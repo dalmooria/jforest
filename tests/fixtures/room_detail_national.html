@@ -1,0 +1,344 @@
+
+
+    
+
+
+
+
+<script type="text/javascript" charset="utf-8">
+	$(function(){
+		photoWrapSlideMulti('#photo_wrap_1');
+		photoWrapSlideMulti('#photo_wrap_2');
+		photoWrapSlideMulti('#photo_wrap_3');
+		fn_tabMenu(0);
+	});
+
+	function fn_tabMenu(num){
+		var menu = $('#tab').children();
+		var con = $('#tab_con').children();
+		var select = $(menu).eq(num);
+		var i = num;
+
+		select.addClass('on');
+		con.eq(num).show();
+
+		menu.click(function(){
+			if(select!==null){
+				select.removeClass("on");
+				con.eq(i).hide();
+			}
+
+			select = $(this);
+			i = $(this).index();
+
+			select.addClass('on');
+			con.eq(i).show();
+		});
+	}
+</script>
+<div class="layer_pop_wrap">
+	<div class="layer_head speed_check_hd">
+		<h2 class="head_title">고라니</h2>
+
+	</div>
+	<div class="layer_body">
+		<div class="body_scroll speed_check_bd">
+			<div id="infoWrap">
+				<div class="linkTab pop tab-col-4">
+					<ul id="tab">
+						
+							
+							
+								<li class="on"><a href="javascript:void(0);" onclick="javascript:fn_tabMenu('1');">숙박시설 정보</a></li>
+								<li><a href="javascript:void(0);" onclick="javascript:fn_tabMenu('2');">숙박시설 이용안내</a></li>
+							
+						
+						<li >
+							<a href="javascript:void(0);" onclick="javascript:fn_tabMenu('3');">배치도</a>
+						</li>
+						<li >
+							<a href="javascript:void(0);" onclick="javascript:fn_tabMenu('4');">평면도</a>
+						</li>
+					</ul>
+				</div>
+				<div class="pop_tab_con" id="tab_con">
+					<div class="con_item">
+						
+							<div class="photo_wrap" id="photo_wrap_1">
+								<div class="photo_control t_view">
+									<a href="#none" class="prev" data-control="prev"><img src="/images/board/sl_left.png" alt="이전 슬라이드" class="mCS_img_loaded"></a>
+									<a href="#none" class="next" data-control="next"><img src="/images/board/sl_right.png" alt="다음 슬라이드" class="mCS_img_loaded"></a>
+								</div>
+								
+									
+										<div class="photo_view">
+											<a href="https://image.foresttrip.go.kr/ino/goods/e7bf7f30-0708-4a38-b7ce-e4af760138f4.jpg" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';" target="_blank">
+												<img src="https://image.foresttrip.go.kr/ino/goods/e7bf7f30-0708-4a38-b7ce-e4af760138f4.jpg" alt="외부이미지" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+											</a>
+											<div class="view_descpt">
+												<p>외부이미지</p>
+											</div>
+										</div>
+									
+								
+									
+								
+									
+								
+									
+								
+									
+								
+									
+								
+								<div class="photo_control t_list">
+									<a href="#none" class="prev" data-control="prev"><img src="/images/board/sl_left.png" alt="이전 슬라이드"></a>
+									<a href="#none" class="next" data-control="next"><img src="/images/board/sl_right.png" alt="다음 슬라이드"></a>
+								</div>
+								<div class="photo_list">
+									<ul>
+										
+											<li class="item">
+												<a href="https://image.foresttrip.go.kr/ino/goods/e7bf7f30-0708-4a38-b7ce-e4af760138f4.jpg" target="_blank">
+													<div class="thumb">
+														<img class="autosize" src="https://image.foresttrip.go.kr/ino/goods/e7bf7f30-0708-4a38-b7ce-e4af760138f4.jpg" alt="외부이미지" data-description="<p>외부이미지</p>" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+													</div>
+													<p class="center mt_10">외부이미지</p>
+												</a>
+											</li>
+										
+											<li class="item">
+												<a href="https://image.foresttrip.go.kr/ino/goods/22ceb5e9-e683-4c0c-8448-1d94eb49921b.jpg" target="_blank">
+													<div class="thumb">
+														<img class="autosize" src="https://image.foresttrip.go.kr/ino/goods/22ceb5e9-e683-4c0c-8448-1d94eb49921b.jpg" alt="내부이미지" data-description="<p>내부이미지</p>" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+													</div>
+													<p class="center mt_10">내부이미지</p>
+												</a>
+											</li>
+										
+											<li class="item">
+												<a href="https://image.foresttrip.go.kr/ino/null/d3a5ada3-9b2f-4eae-b288-03d332583b40.jpg" target="_blank">
+													<div class="thumb">
+														<img class="autosize" src="https://image.foresttrip.go.kr/ino/null/d3a5ada3-9b2f-4eae-b288-03d332583b40.jpg" alt="고라니 외부2.jpg" data-description="<p>갤러리7</p>" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+													</div>
+													<p class="center mt_10">갤러리7</p>
+												</a>
+											</li>
+										
+											<li class="item">
+												<a href="https://image.foresttrip.go.kr/ino/null/8b95edb1-a96c-421b-b931-7a1bbfd1c9c5.jpg" target="_blank">
+													<div class="thumb">
+														<img class="autosize" src="https://image.foresttrip.go.kr/ino/null/8b95edb1-a96c-421b-b931-7a1bbfd1c9c5.jpg" alt="고라니 내부1.jpg" data-description="<p>갤러리8</p>" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+													</div>
+													<p class="center mt_10">갤러리8</p>
+												</a>
+											</li>
+										
+											<li class="item">
+												<a href="https://image.foresttrip.go.kr/ino/null/a75880b2-0574-453c-81d1-1c19530492d6.jpg" target="_blank">
+													<div class="thumb">
+														<img class="autosize" src="https://image.foresttrip.go.kr/ino/null/a75880b2-0574-453c-81d1-1c19530492d6.jpg" alt="고라니 내부4.jpg" data-description="<p>갤러리11</p>" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+													</div>
+													<p class="center mt_10">갤러리11</p>
+												</a>
+											</li>
+										
+											<li class="item">
+												<a href="https://image.foresttrip.go.kr/ino/null/a08f8d83-865a-4ddd-8349-545ec1627a33.jpg" target="_blank">
+													<div class="thumb">
+														<img class="autosize" src="https://image.foresttrip.go.kr/ino/null/a08f8d83-865a-4ddd-8349-545ec1627a33.jpg" alt="고라니내부1.jpg" data-description="<p>갤러리12</p>" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+													</div>
+													<p class="center mt_10">갤러리12</p>
+												</a>
+											</li>
+										
+									</ul>
+								</div>
+							</div>
+						
+						<h3>기본정보</h3>
+						<table class="tbl">
+							<caption>
+								<strong>기본정보의 시설명, 주소, 시설분류, 방이름, 인실, 편의시설의 항목에 관한 표입니다.</strong>
+							</caption>
+							<colgroup>
+								<col style="width: 30%;">
+								<col style="width: 70%;">
+							</colgroup>
+							<tbody>
+								<tr>
+									<th scope="row">숙박시설 명</th>
+									<td class="left">숲속의집</td>
+								</tr>
+								<tr>
+									<th scope="row">방이름</th>
+									<td class="left">고라니</td>
+								</tr>
+								<tr>
+									<th scope="row">인실/면적</th>
+									<td class="left">기준인원 : 5
+										<br>최대인원 : 5
+										<br>면적 : 31㎡
+									</td>
+								</tr>
+								<tr>
+									<th scope="row">편의시설</th>
+									<td class="left">
+										
+											TV, 
+										
+											냉장고, 
+										
+											샤워실, 
+										
+											에어컨, 
+										
+											이불장, 
+										
+											인덕션
+										
+									</td>
+								</tr>
+								<tr>
+									<th scope="row">용도</th>
+									<td class="left">숲속의집</td>
+								</tr>
+								<tr>
+									<th scope="row">입/퇴실 시간</th>
+									<td class="left">15:00 ~ 11:00</td>
+								</tr>
+							</tbody>
+						</table>
+						
+							<h3>가격정보</h3><div style="padding-bottom:10px;"><h1>※ 가격정보는 오늘일자 기준 가격정보 입니다.</h1></div>
+							
+								
+								
+								
+								
+							
+								
+								
+								
+								
+							
+								
+								
+								
+								
+							
+								
+								
+								
+								
+							
+							<table class="tbl">
+								<caption>
+									<strong>기본정보의 시설명, 주소, 시설분류, 방이름, 인실, 편의시설의 항목에 관한 표입니다.</strong>
+								</caption>
+								<colgroup>
+									<col style="width: 30%;">
+									<col style="width: 70%;">
+								</colgroup>
+								<tbody>
+									<tr>
+										<th scope="row" rowspan="2">비수기</th>
+										<td class="left">평일요금               58,000원</td>
+									</tr>
+									<tr>
+										<td class="left">주말요금              106,000원</td>
+									</tr>
+									<tr>
+										<th scope="row" rowspan="2">성수기</th>
+										<td class="left">평일요금              106,000원</td>
+									</tr>
+									<tr>
+										<td class="left">주말요금              106,000원</td>
+									</tr>
+								</tbody>
+							</table>
+						
+						<br />
+						
+					</div>
+					<div class="con_item" style="display:none;">
+						<h3>이용안내</h3>
+						<p class="wd_txt" style="white-space:break-spaces;"><p>◈시설현황◈<br>방1, 거실1, 주방1, 화장실1, 싱크대,, 피크닉테이블</p><p>취사도구 및 객실비치물품은 글 아래에서 확인 가능<br><span style="color: red;"><span style="color: red;"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: red;"><span style="color: red;">※ 에어컨(유료)이 준비되어 있습니다.<span style="color: rgb(255, 0, 0);"> </span><span style="color: rgb(255, 0, 0);">(1일 기준 2,000원- ①현장결제 ②객실 예약시 결제, 모두 가능)</span></span></span></span></span></span></span></span></span><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: red;"><span style="color: red;"></span></span></span></span></span></span></span><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: red;"><span style="color: red;"></span></span></span></span></span></span><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: red;"><span style="color: red;"></span></span></span></span></span><span style="color: rgb(255, 0, 0);"><span style="color: rgb(255, 0, 0);"><span style="color: red;"><span style="color: red;"></span></span></span></span><span style="color: rgb(255, 0, 0);"><span style="color: red;"><span style="color: red;"></span></span></span><span style="color: red;"><span style="color: red;"></span></span><span style="color: red;"><span style="color: rgb(0, 0, 0);"> </span></span></span></span></span><br style="clear: both;"><br>◈준비물◈<br>세면도구(비누 1개만 비치되어 있음),수건,휴지,드라이기</p><p>* 연중바베큐는 불가능합니다. (숯,  번개탄,  장작불,  모닥불 등 사용 금지) 다만,  「휴대용 가스레인지」는 사용 가능함. </p><p><br></p><p>※ 입실:오후3시-10시<br></p><p>※ 입실시간을 준수하여 주시기 바랍니다.<br>(입실시간 이외에는 입실이 거부될 수 있습니다.)<br>※퇴실: <span style="color: rgb(42, 0, 255);">다음날 오전 11시까지</span>(매표소에 방열쇠 반납)</p><p><img src="/com/cm/editorDownload.do?newName=735c3c77-076b-4af6-a2ac-c4e3b68c665e" title="(공통)객실비치물품_안내(5인실)-반달곰,고라니,산토끼_오소리,너구리.jpg"> </p><p>◈주의사항◈</p><p>- 애완견 동반 입장불가</p><p>- 기준인원 초과 시 입실불가입니다.</p><p>- 와이파이 사용 안됩니다.</p><p>- 객실이 산에 위치하고 있어 벌레가 나올 수 있습니다.</p></p>
+						
+					</div>
+					<div class="con_item" style="display:none;">
+						<div class="photo_wrap" id="photo_wrap_2">
+							<div class="photo_control t_view">
+								<a href="#none" class="prev" data-control="prev"><img src="/images/board/sl_left.png" alt="이전 슬라이드" class="mCS_img_loaded"></a>
+								<a href="#none" class="next" data-control="next"><img src="/images/board/sl_right.png" alt="다음 슬라이드" class="mCS_img_loaded"></a>
+							</div>
+							
+								<div class="photo_view">
+									<a href="https://image.foresttrip.go.kr/ino/instt/d7e0d331-098a-4d76-b9cf-012fd93394fb.jpg" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';" target="_blank">
+										<img src="https://image.foresttrip.go.kr/ino/instt/d7e0d331-098a-4d76-b9cf-012fd93394fb.jpg" alt="전체배치도" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+									</a>
+									<div class="view_descpt">
+										<p>전체배치도</p>
+									</div>
+								</div>
+							
+							
+							<div class="photo_control t_list">
+								<a href="#none" class="prev" data-control="prev"><img src="/images/board/sl_left.png" alt="이전 슬라이드"></a>
+								<a href="#none" class="next" data-control="next"><img src="/images/board/sl_right.png" alt="다음 슬라이드"></a>
+							</div>
+							<div class="photo_list">
+								<ul>
+									
+										<li class="item">
+											<a href="https://image.foresttrip.go.kr/ino/instt/d7e0d331-098a-4d76-b9cf-012fd93394fb.jpg" target="_blank">
+												<div class="thumb">
+													<img class="autosize" src="https://image.foresttrip.go.kr/ino/instt/d7e0d331-098a-4d76-b9cf-012fd93394fb.jpg" alt="전체배치도" data-description="<p>전체배치도</p>" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+												</div>
+												<p class="center mt_10">전체배치도</p>
+											</a>
+										</li>
+									
+									
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="con_item" style="display:none;">
+						<div class="photo_wrap" id="photo_wrap_3">
+							<div class="photo_control t_view">
+								<a href="#none" class="prev" data-control="prev"><img src="/images/board/sl_left.png" alt="이전 슬라이드" class="mCS_img_loaded"></a>
+								<a href="#none" class="next" data-control="next"><img src="/images/board/sl_right.png" alt="다음 슬라이드" class="mCS_img_loaded"></a>
+							</div>
+							<div class="photo_view">
+								<a href="https://image.foresttrip.go.kr/ino/goods/a4e2934f-14a6-41c3-afc1-786eed0044a4.jpg" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';" target="_blank">
+									<img src="https://image.foresttrip.go.kr/ino/goods/a4e2934f-14a6-41c3-afc1-786eed0044a4.jpg" alt="평면도" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+								</a>
+								<div class="view_descpt">
+									<p>평면도</p>
+								</div>
+							</div>
+							<div class="photo_control t_list">
+								<a href="#none" class="prev" data-control="prev"><img src="/images/board/sl_left.png" alt="이전 슬라이드"></a>
+								<a href="#none" class="next" data-control="next"><img src="/images/board/sl_right.png" alt="다음 슬라이드"></a>
+							</div>
+							<div class="photo_list">
+								<ul>
+									<li class="item">
+										<a href="https://image.foresttrip.go.kr/ino/goods/a4e2934f-14a6-41c3-afc1-786eed0044a4.jpg" target="_blank">
+											<div class="thumb">
+												<img class="autosize" src="https://image.foresttrip.go.kr/ino/goods/a4e2934f-14a6-41c3-afc1-786eed0044a4.jpg" alt="평면도" data-description="<p>평면도</p>" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+											</div>
+											<p class="center mt_10">평면도</p>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <a href="#" id="epeopleLayerClsoe" class="head_close"><img src="/images/subPortal/001/common/layer_close.png" alt="레이어 닫기"></a>
+</div>

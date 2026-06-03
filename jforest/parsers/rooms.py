@@ -9,13 +9,16 @@ def parse_room_list(text: str) -> list[dict]:
     rooms = []
     for tr in tree.css("tr.mapListTr"):
         tr_id = tr.attributes.get("id") or ""
-        m = re.search(r"GID[0-9A-Za-z]+", tr_id)
-        if not m:
+        # goods_id는 지자체(GID…)와 국립(G0…) 두 형식이 있다. tr id는 `tr_<goodsId>`.
+        m = re.search(r"G[0-9A-Za-z]{10,}", tr_id)
+        if m:
+            goods_id = m.group(0)
+        else:
             inner = tr.html or ""
-            m = re.search(r"goodsId=(GID[0-9A-Za-z]+)", inner)
-        if not m:
+            mm = re.search(r"goodsId=(G[0-9A-Za-z]{10,})", inner)
+            goods_id = mm.group(1) if mm else None
+        if not goods_id:
             continue
-        goods_id = m.group(0).replace("goodsId=", "")
         tds = tr.css("td")
         room_type = tds[0].text(strip=True) if len(tds) > 0 else None
         name = tds[1].text(strip=True) if len(tds) > 1 else None
