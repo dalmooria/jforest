@@ -1,0 +1,3406 @@
+
+
+    
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+ 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    
+    <title>숲나들e - 자연휴양림안내 | </title>
+    
+    <script type="text/javascript">
+    
+    var browerCheck = "";
+    //alert(browerCheck);
+    
+        function getIEVersion() { 
+    
+             var word; 
+             var agent = navigator.userAgent.toLowerCase(); 
+    
+             if(navigator.appName == "Microsoft Internet Explorer"){    
+                 // IE old version ( IE 10 or Lower ) 
+                 word = "msie "; 
+             }else if(agent.search("trident") > -1){    
+                 // IE 11
+                 word = "trident/.*rv:"; 
+             }else if(agent.search("edge/") > -1){  
+                 // Microsoft Edge 
+                 word = "edge/"; 
+             }else{
+                 // 그외, IE가 아니라면 ( If it's not IE or Edge )  
+                 return -1; 
+             }
+    
+             var reg = new RegExp(word + "([0-9]{1,})(\\.{0,}[0-9]{0,1})"); 
+    
+             if (reg.exec( agent ) != null) {
+                 return parseFloat( RegExp.$1 + RegExp.$2 ); 
+             }
+    
+             return -1; 
+        } 
+    
+        function checkVersion() { 
+            
+            var versionIE = getIEVersion();
+    
+            if(versionIE != -1 && versionIE < 9) {
+                //alert('현재 인터넷 익스플로러 버전이 8이하 입니다.');
+                location.href="/ie_upgrade.jsp";
+            }
+        }
+
+    
+        checkVersion();
+    </script>
+    
+    <meta name="description" content="숲나들e - 자연휴양림안내">           
+    <link rel="stylesheet" href="/portal/css/sprite.css?t_=20260603_2333">
+    
+        
+        
+        
+            <link rel="stylesheet" href="/portal/css/font.css?t_=20260603_2333">
+            <link rel="stylesheet" href="/portal/css/common.css?t_=20260603_2333">
+            <link rel="stylesheet" href="/portal/css/layout.css?t_=20260603_2333">
+            <link rel="stylesheet" href="/portal/css/content.css?t_=20260603_2333">
+            <link rel="stylesheet" href="/portal/css/board.css?t_=20260603_2333">
+        
+    
+    <link rel="stylesheet" href="/portal/css/jquery-ui.min.css">
+    <link rel="stylesheet" href="/portal/css/search.css?t_=20260603_2333">
+    <link rel="stylesheet" href="/portal/css/table.css?t_=20260603_2333">
+    
+
+    <script src="/portal/js/jquery-1.12.4.min.js"></script>
+    <script src="/portal/js/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <!-- <link rel="stylesheet" href="/portal/css/jquery-ui.min.css"> -->
+
+    <link rel="stylesheet" href="/portal/js/mCustomScrollbar/jquery.mCustomScrollbar.css">
+    <script src="/portal/js/mCustomScrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="/portal/js/pgwslideshow/pgwslideshow.min.css">
+    <link rel="stylesheet" type="text/css" href="/portal/js/pgwslideshow/pgwslideshow_light.min.css">
+    <script src="/js/netfunnel.js?t_=20260603_2333"></script>
+
+	
+    
+
+
+    <script src="/portal/js/main.js?t_=20260603_2333"></script>
+    
+        
+        
+        
+            <script src="/portal/js/menu.js?t_=20260603_2333"></script>
+            <script src="/portal/js/common.js?t_=20260603_2333"></script>
+        
+    
+    <script src="/portal/js/cookie.js?t_=20260603_2333"></script>
+    <script src="/portal/js/commonPot.js?t_=20260603_2333"></script>
+    
+    <script src="/js/josa.js?t_=20260603_2333"></script>
+    <script src="/js/validation.js?t_=20260603_2333"></script>
+    <script src="/js/parameter.js?t_=20260603_2333"></script>
+    <script type="text/javascript" src="/js/pgwslideshow/pgwslideshow.min.js"></script>
+    
+    <script type="text/javascript" src="/portal/js/wl6.js?t_=20260603_2333"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E22WFNBEF7"></script>
+    <script type="text/javascript" src="//wcs.pstatic.net/wcslog.js"></script>
+    
+	<!--[if lt IE 10]>
+		<script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
+	    <script src="/portal/js/html5shiv.min.js"></script>
+	    <link rel="stylesheet" href="/portal/css/ie9.css">
+	<![endif]-->
+
+    
+    <script>
+    
+    function fn_addIntrsRcrfr(insttId, insttNm) {
+        
+            if(!confirm("로그인 후 사용 가능한 기능입니다.\n로그인 화면으로 이동하시겠습니까?")) {
+                return false;
+            }else{
+                location.href="/com/login.do";
+                return false;
+            }
+        
+        
+        var rtnInt = 0;    
+        
+        $.ajax({
+            url:'/pot/mp/ir/insertIntrsRcrfr.do',
+            type:'get',
+            async:false,
+            dataType:'json',
+            data:{'insttId':insttId, 'insttNm':insttNm},
+            beforeSend: function (xhr) {xhr.setRequestHeader("X-Ajax-call", "true");},  //190422 ajax 필수
+            success:function(data){
+                
+                if(data.successNo == 1) {
+                    //추가 성공
+                    alert(Josa.r(insttNm,'을/를')+" 나의 관심 시설 목록에 추가했습니다.");
+
+                }else if(data.successNo == -1) {
+                    //삭제 성공
+                    alert(Josa.r(insttNm,'을/를')+" 나의 관심 시설 목록에서 삭제했습니다.");
+
+                }else{
+                    //실패
+                    alert("관심 시설 추가/삭제를 실패 했습니다.\n확인후 다시 시도하시기 바랍니다.");
+                }
+                
+                rtnInt = data.successNo;
+                
+                
+            },
+            error:function(err) {
+                
+                alert("관심 시설 추가/삭제를 실패 했습니다.\n확인후 다시 시도하시기 바랍니다.");
+                
+            }
+        });
+        
+        return rtnInt;
+        
+    }
+    
+    function fn_addIntrsGoods(insttId, goodsId) {
+        
+            if(!confirm("로그인 후 사용 가능한 기능입니다.\n로그인 화면으로 이동하시겠습니까?")) {
+                return false;
+            }else{
+                location.href="/com/login.do";
+                return false;
+            }
+        
+        
+        var rtnInt = 0; 
+        
+        $.ajax({
+            url:'/pot/mp/ir/insertIntrsGoods.do',
+            type:'get',
+            async:false,
+            dataType:'json',
+            data:{'insttId':insttId, 'goodsId':goodsId},
+            beforeSend: function (xhr) {xhr.setRequestHeader("X-Ajax-call", "true");},  //190422 ajax 필수
+            success:function(data){
+
+                if(data.successNo == 1) {
+                    //추가 성공
+                    alert("선택하신 상품을 나의 관심 상품 목록에 추가했습니다.");
+                }else if(data.successNo == -1) {
+                    //삭제 성공
+                    alert("선택하신 상품을 나의 관심 상품 목록에 추가했습니다.");
+
+                }else{
+                    //추가 실패
+                    alert("관심 상품 추가를 실패 했습니다.\n확인후 다시 시도하시기 바랍니다.");
+                }
+                
+                rtnInt = data.successNo;
+                
+            },
+            error:function(err) {
+                alert("관심 상품 추가를 실패 했습니다.\n확인후 다시 시도하시기 바랍니다.");
+            }
+        });
+        
+        return rtnInt;
+    }
+    
+    function fn_addBndlGoods(insttId, goodsId, stdt, eddt, upperGoodsClsscCd, notm) {
+    	
+	        if(!confirm("로그인 후 사용 가능한 기능입니다.\n로그인 화면으로 이동하시겠습니까?")) {
+	            return false;
+	        }else{
+	            location.href="/com/login.do";
+	            return false;
+	        }
+	    
+    
+    	var rtnInt = 0;
+    	
+	    $.ajax({
+	        url:'/pot/mp/ir/insertBndlGoods.do',
+	        type:'get',
+	        async:false,
+	        dataType:'json',
+	        data:{
+	        	'insttId':insttId
+	        	, 'goodsId':goodsId
+	        	, 'useBgdt':stdt
+	        	, 'useEddt':eddt
+	        	, 'upperGoodsClsscCd':upperGoodsClsscCd
+	        	, 'notm':notm
+	        },
+	        beforeSend: function (xhr) {xhr.setRequestHeader("X-Ajax-call", "true");},  //190422 ajax 필수
+	        success:function(data){
+	        	if(data == 99) {
+	        		alert("당일예약이 불가능한 상품입니다.");
+	        	} else if(data == 0) {
+	        		alert("일괄 결제 목록에는 최대 5개까지만 등록 가능합니다.");
+	        	} else if(data == 1) {
+	        		alert("선택하신 상품을 일괄 결제 목록에 추가했습니다.");
+	        	} else if(data == 2) {
+	        		alert("이미 일괄 결제 목록에 포함된 상품입니다.");
+	            } else{
+	                alert("일괄 결제 목록 추가를 실패 했습니다.\n확인후 다시 시도하시기 바랍니다.");
+	            }
+	            
+	            rtnInt = data;
+	        },
+	        error:function(err) {
+	            alert("일괄 결제 목록 추가를 실패 했습니다.\n확인후 다시 시도하시기 바랍니다.");
+	        }
+	    });
+    
+    	return rtnInt;
+    }
+    </script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		
+		gtag('config', 'G-E22WFNBEF7');
+		
+		if(!wcs_add) var wcs_add = {};
+			wcs_add["wa"] = "1849d447eea4030";
+			if(window.wcs) {
+			wcs_do();
+		}
+	</script>
+	
+</head>
+<body>
+<div id="skip">
+    <strong class="hide">반복영역 건너뛰기</strong>
+    <a href="#gnb">주메뉴 바로가기</a>
+<!--     <a href="javascript:void(0);">보조메뉴 바로가기</a> -->
+    <a href="#container">본문 바로가기</a>
+</div>
+<div id="header-top">
+    <div class="toggle-wrap">
+        <div class="toggle-head">
+            <div class="inner">
+                <img src="/intro/images/eg_ico.png" alt="전자정부"><span class="nuri-txt">이 누리집은 대한민국 공식 전자정부 누리집입니다.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="wrap">
+
+    
+
+    
+    
+
+
+ 
+
+
+
+
+
+
+<div id="header"  >
+
+
+    <div class="ht_util">
+        <div class="fttp-link">
+            <a href="/main.do?hmpgId=FRIP" class='ov'>자연휴양림</a>
+            <a href="/frtrlMain.do" >숲길</a>
+            <a href="/mnfrsLeportsMain.do" >산림레포츠</a>
+        </div>
+        <form name="logoutForm" method="post" action="/com/logout" target="_parent">
+            <div class="util_group">
+                
+                    
+                        
+                        
+                        
+                            .
+                        
+                    
+                    <a href='/com/login.do?hmpgId=FRIP&menuId=007003&targetUrl=/main.do?hmpgId=FRIP'><img src="/portal/images/layout/ut_top_login.png" alt="로그인">로그인</a>
+                    <a href="/pot/mc/ms/insertStplatAgreeView.do?hmpgId=FRIP&menuId=007002">
+                        <img src="/portal/images/layout/ut_top_entry.png" alt="회원가입"> 회원가입
+                    </a>
+                
+                
+                
+            </div>
+        </form>
+    </div>
+
+    <div id="animate">
+        <h1 class="logo">
+
+            <a href="/com/index.do"><img src="/portal/images/layout/logo.png" alt="숲나들이"></a>
+            
+                
+                
+                
+                    <small><a href="/main.do?hmpgId=FRIP">자연휴양림</a></small>
+                
+            
+        </h1>
+        <div id="gnb">
+            <ul id="tm">
+            </ul>
+        </div>
+        <div class="gnb_bg"></div>
+        <!-- 끝 : #gnb -->
+    </div>
+    <!-- #animate -->
+
+    <form id="gnrlSrchWord" name="gnrlSrchWord" method="get">
+    <div class="hr_util">
+
+        <div class="hrut_login sub">
+            
+                <a href="/com/login.do?hmpgId=FRIP&targetUrl=/main.do?hmpgId=FRIP">
+                <img src="/portal/images/layout/ut_top_login_mo.png" alt="로그인">로그인</a>
+            
+            
+        </div>
+
+        
+        
+            <a href="https://www.foresttrip.go.kr" class="totSch_btn"><img src="/portal/images/layout/fs_util_search.png" alt="통합검색"></a>
+                    <div class="search-input">
+                        <label for="srch-input" class="hide">통합검색창입니다</label>
+                        <input type="text" id="srch-input" name="srchWord">
+                        <button type="button" onclick="fn_gnrlSrchWord(); return false;"><img src="/portal/images/layout/fs_util_search.png" alt="검색"></button>
+                    </div>
+        
+        <a href="https://www.foresttrip.go.kr/" onclick="return false;" class="myCont_btn"> <img src="/portal/images/layout/fs_util_my.png" alt="나의 컨텐츠">
+        </a>
+        <div class="myPage my_menu">
+            <strong class="myPageTi"><img src="/portal/images/layout/ut_top_my.png" alt="마이페이지 이미지">마이페이지</strong>
+            <ul class="my_list" id="my_list">
+            </ul>
+            <button class="close_box">
+                <span class="hide">닫기</span>
+            </button>
+
+        </div>
+        <a href="https://www.foresttrip.go.kr/" onclick="return false;" class="sitemap_btn"><img src="/portal/images/layout/fs_util_sitemap.png" alt="사이트맵"></a> <a
+            href="https://www.foresttrip.go.kr/" onclick="return false;" class="mMenu_btn"><img src="/portal/images/layout/hr_util_icon_03.png" alt="모바일메뉴"></a>
+    </div>
+    </form>
+    <!-- 사이트맵 : s -->
+    <div id="siteMap">
+        <div class="layout">
+            <ul class="sitemap_list" id="menuList">
+                <li></li>
+            </ul>
+            <button type="button" class="sitemap_close">사이트맵 닫기</button>
+        </div>
+    </div>
+    <!-- 사이트맵 : e -->
+
+    <!-- 통합검색 : s -->
+    <div class="general_search">
+
+        <div class="layout">
+
+            <script>
+                                                    /* function fn_gnrlSrch() {
+                                                        var form = document.gnrlSrch;
+
+                                                        form.action = "/pot/is/gs/selectGnrlSrchView.do";
+                                                        form.target = "_self";
+                                                        form.method = "get";
+                                                        form.submit();
+                                                    } */
+                                                </script>
+
+            <form id="gnrlSrch" name="gnrlSrch" method="get">
+                <input type="hidden" name="hmpgId" value="FRIP">
+                <div class="input">
+
+                    <label id="srchWordLbl" for="genaralSearchInput">검색어를 입력하세요.</label> <input type="text"
+                        id="genaralSearchInput" name="srchWord" value="">
+                    <button type="submit" onClick="fn_gnrlSrch(); return false;">
+                        <img src="/portal/images/layout/gsearch_btn.png" alt="검색">
+                    </button>
+
+                </div>
+
+                <div class="gsearch_keyowrd">
+
+                    <span class="label"><img src="/portal/images/layout/gsearch_keyword.png" alt=""> 추천검색어</span>
+                    <span class="pt" id="rcmndWord"></span>
+
+                </div>
+
+                <a class="gsearch_close" href="https://www.foresttrip.go.kr/" onclick="return false;"><span class="hide">통합검색 닫기</span></a>
+
+            </form>
+
+        </div>
+    </div>
+    <!-- 통합검색 : e -->
+</div>
+
+
+<!-- 모바일메뉴 : s -->
+<nav id="mMenu">
+    <div class="mMenu_top">
+
+        <a href="/com/index.do" class="mMenu_logo"><img src="/portal/images/layout/logo.png" alt="숲나들이"></a>
+    </div>
+    <div class="mMenu_mem">
+        
+            <ul>
+                <li><a href="/com/login.do?targetUrl=/main.do?hmpgId=FRIP" class="login">로그인</a></li>
+                <li><a href="/pot/mc/ms/insertStplatAgreeView.do?hmpgId=FRIP" class="member">회원가입</a></li>
+            </ul>
+        
+
+        
+
+
+    </div>
+    <!-- 2 또는 3뎁스 메뉴의 a태그에 class="on"을 주면 메뉴를 열때 해당 뎁스의 메뉴가 열려진 상태로 메뉴가 표시됩니다. 서브페이지에 사용하시면 됩니다.-->
+    <ul class="mMenu_list" id="mMenu_list">
+        <li></li>
+    </ul>
+    <a href="https://www.foresttrip.go.kr/" onclick="return false;" class="mMenu_close">메뉴 닫기</a>
+</nav>
+<!-- 모바일메뉴 : e -->
+
+
+
+    
+    
+        
+        
+        
+            
+
+
+
+
+    
+        
+
+
+
+<script type="text/javascript" src="/js/rep/jquery.blockUI.js"></script>
+<script type="text/javascript" src="/js/rep/messageBox.js"></script>
+
+
+
+
+
+
+<script src="/js/netfunnel.js?t_=20260603_2333"></script>
+<script type="text/javascript">
+
+    var delayTimer = null;
+    
+    $(document).ready(function() {
+        $("#minus_stng_nofpr, #plus_stng_nofpr").on('click', function(event) {
+            var clss = $(this).attr("class");
+            if(clss == "plus") {
+                nofpr = Number(nofpr)+1;
+                $("#stng_nofpr").html(nofpr);
+            } else if(clss == "minus") {
+                if(nofpr == 1) {
+                    alert("인원은 최소 1명이 기준입니다."+_no_click_msg);
+                    return false;
+                } else {
+                    nofpr = Number(nofpr)-1;
+                    $("#stng_nofpr").html(nofpr);
+                }
+            } 
+         });
+        
+        $(".totSch_btn").on("keydown", function(e) {
+            if (e.which == 13) {
+                $("#animate").removeClass("ov");
+                $("#tm ul").css('display','none');
+            }
+        });
+        
+        $("#tm ul > li > a").focus(function() {
+            $(".general_search").css('display', 'none');
+        });
+
+        $("#tm > li > a").focus(function() {
+            $("#tm ul").css('display', 'inline-block');
+            $(".gnb_bg").css('display', 'inline-block');
+        });
+        
+        // 시/도 목록 조회 - 2019.07.17
+        fn_sidoList();   
+        
+        
+        var nofpr = 2;
+        
+          
+        $("#stng_nofpr").html(nofpr);
+        
+        
+        
+        
+            
+        
+        
+        
+         
+        
+        
+        
+        
+        
+        /*
+        
+        
+        
+            
+        
+        
+        */
+        
+        
+        
+        
+          
+        
+        // 휴양시설 선택에 따라 Calendar 분기처리
+        if($("#srchInsttId").val() == '' || $("#srchInsttId").val() == null) {
+            fn_defaultCalendar();
+        } else {
+            fn_initCalendar($("#srchInsttId").val());
+        }
+        
+    });
+    
+    function fn_rcfrsFclList(insttArcd) {
+        $("#srch_rcfcl").html("");
+        // 휴양시설 검색
+        $.ajax({
+            url: "/rep/or/selectInsttListForSearch.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd&srchSido="+insttArcd,
+            type:'get',
+            dataType:'json',
+            contentType : 'application/json; charset=UTF-8',
+            async: false,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-Ajax-call", "true");
+            },
+            success: function(data) {
+                var insttList = data.insttList;
+                var rtnHtml = '<ul class="horizen">';
+                rtnHtml += '<li id=\'rcfclCd_'+ '0000' +'\' class=\''+ '전체' + '\'><a href="https://www.foresttrip.go.kr" onclick="fn_setRcfcl(\'' + '' + '\',\'' + '전체' + '\'); return false;">' + '전체' + '</a></li>';
+                $.each(insttList, function(index, instt){
+                    rtnHtml += '<li id=\'rcfclCd_'+ instt.insttId +'\' class=\''+ instt.insttNm + '\'><a href="https://www.foresttrip.go.kr/" onclick="fn_setRcfcl(\'' + instt.insttId + '\',\'' + instt.insttNm + '\'); return false;">';
+                    if(instt.insttTpCd == "01") {
+                        rtnHtml += '<span class="mr_reg mr_reg_1">국</span>';
+                    }else if(instt.insttTpCd == "02") {
+                        rtnHtml += '<span class="mr_reg mr_reg_2">공</span>';
+                    }else if(instt.insttTpCd == "04") {
+                        rtnHtml += '<span class="mr_reg mr_reg_3">사</span>';
+                    }
+                    rtnHtml += instt.insttNm + '</a></li>';
+                });
+                rtnHtml += '</ul>';
+                $("#srch_rcfcl").html(rtnHtml);
+            },
+            error:function(xhr,status,e) {
+                alert("산림휴양시설 목록 조회 실패"  + _no_click_msg);
+            },
+            complete:function() {
+            }
+        });
+    }
+    
+    function fn_sidoList() {
+        $("#srch_region").html("");
+        $.ajax({
+            url: "/rep/or/selectSiDoList.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd",
+            type:'get',
+            dataType:'json',
+            contentType : 'application/json; charset=UTF-8',
+            async: false,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-Ajax-call", "true");                    
+            },
+            success: function(sidoList) {
+                var rtnHtml = '<ul>';
+                $.each(sidoList, function(index, data){
+                    rtnHtml += '<li id=\'areaCd_'+ data.detailCode +'\' class=\''+ data.codeNm + '\'><a href="https://www.foresttrip.go.kr/" onclick="fn_setRegion(\'' + data.detailCode + '\',\'' + data.codeNm + '\'); return false;">' + data.codeNm + '</a></li>';
+                });
+                rtnHtml += '</ul>';
+                $("#srch_region").html(rtnHtml);
+            },
+            error:function(xhr,status,e) {
+                fn_failMsg(xhr, status, e);
+            },
+            complete:function() {
+            }
+        });
+    }
+    
+    function fn_setRegion(insttArcd, codeDc) {
+        $("#srchInsttArcd").val(insttArcd);
+        $("#srch_region_txt").text(codeDc);
+
+        fn_defaultCalendar();
+        $("#srchInsttId").val("");
+        $("#srch_rcfcl_txt").text("전체");
+        $("#srch_region").prev().removeClass("ov");
+
+        $("#srch_rcfcl").html("");
+        
+        // 휴양시설 변경 시 달력 초기화
+        /*
+        if($("#srchInsttId").val() != '' && $("#srchInsttId").val() != null) {
+            $("#rsrvtBgDt", "form[name='srch_frm']").val("");
+            $("#rsrvtEdDt", "form[name='srch_frm']").val("");
+            $("#calPicker", "form[name='srch_frm']").val("");
+            var btn = $('#calPicker');
+            btn.prev().show();            
+        }
+        */
+        
+        // 휴양시설 검색
+        $.ajax({
+            url: "/rep/or/selectInsttListForSearch.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd&srchSido="+insttArcd,
+            type:'get',
+            dataType:'json',
+            contentType : 'application/json; charset=UTF-8',
+            async: false,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-Ajax-call", "true");
+            },
+            success: function(data) {
+                var insttList = data.insttList;
+                var rtnHtml = '<ul class="horizen">';
+                rtnHtml += '<li id=\'rcfclCd_'+ '0000' +'\' class=\''+ '전체' + '\'><a href="https://www.foresttrip.go.kr/" onclick="fn_setRcfcl(\'' + '' + '\',\'' + '전체' + '\'); return false;">' + '전체' + '</a></li>';
+                $.each(insttList, function(index, instt){
+                    rtnHtml += '<li id=\'rcfclCd_'+ instt.insttId +'\' class=\''+ instt.insttNm + '\'><a href="https://www.foresttrip.go.kr/" onclick="fn_setRcfcl(\'' + instt.insttId + '\',\'' + instt.insttNm + '\'); return false;">';
+                    if(instt.insttTpCd == "01") {
+                        rtnHtml += '<span class="mr_reg mr_reg_1">국</span>';
+                    }else if(instt.insttTpCd == "02") {
+                        rtnHtml += '<span class="mr_reg mr_reg_2">공</span>';
+                    }else if(instt.insttTpCd == "04") {
+                        rtnHtml += '<span class="mr_reg mr_reg_3">사</span>';
+                    }
+                    rtnHtml += instt.insttNm + '</a></li>';
+                });
+                rtnHtml += '</ul>';
+                $("#srch_rcfcl").html(rtnHtml);
+            },
+            error:function(xhr,status,e) {
+                alert("산림휴양시설 목록 조회 실패"  + _no_click_msg);
+            },
+            complete:function() {
+            }
+        });
+    }
+    
+    function fn_setRcfcl(insttId, insttNm) {
+        $("#srchInsttId").val(insttId);
+        $("#srch_rcfcl_txt").text(insttNm);
+
+        if(insttId != '' && insttId != null) {
+            fn_initCalendar($("#srchInsttId").val());
+        }
+        $("#srch_rcfcl").prev().removeClass("ov");
+        
+        // 휴양시설 변경 시 달력 초기화
+        /*
+        if($("#srchInsttId").val() != '' && $("#srchInsttId").val() != null) {
+            $("#rsrvtBgDt", "form[name='srch_frm']").val("");
+            $("#rsrvtEdDt", "form[name='srch_frm']").val("");
+            $("#calPicker", "form[name='srch_frm']").val("");
+            var btn = $('#calPicker');
+            btn.prev().show();            
+        }
+        */
+    }
+    
+    
+    var setLocateNamekeyEnter = false;
+    function fn_remmnAreaOrRcfclList(e) {
+        var btn = $('.yeyakSearchName');
+        var previewLocate = $('.preview_locate');
+
+       if (e.keyCode == 38 || e.keyCode == 40) {
+           btn.parent().addClass('ov');
+           return false;
+       }
+       if (setLocateNamekeyEnter && e.keyCode == 9) {
+           return false;
+       }
+       if (!btn.val().length) {
+           btn.parent().removeClass('ov');
+           previewLocate.html('');
+           return false;
+       }
+
+       if (e.keyCode == 13) {
+           setLocateNamekeyEnter = true;
+           btn.parent().removeClass('ov');
+           previewLocate.html('');
+       } else {
+           setLocateNamekeyEnter = false;
+           btn.parent().addClass('ov');
+       }
+
+        if (delayTimer) {
+            window.clearTimeout(delayTimer);
+        }
+        delayTimer = window.setTimeout(fn_searchWordList, 200);
+    }
+
+    function fn_searchWordList() {
+        var keyword = $("#keyword").val();
+        if(keyword != "") {
+            $.ajax({
+                url : "/rep/cm/remmnAreaOrRcfclList.do?keyword=" + encodeURIComponent(encodeURIComponent(keyword)),
+                type:'get',
+                dataType: 'json',
+                contentType:'application/json; charset=UTF-8',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-Ajax-call", "true");                    
+                },
+                success: function(data){
+                    var wordList = data;
+                    var rtnHtml = "";
+                    wordList.forEach(function(item, idx, arr){
+                        var insttId = null;
+                        rtnHtml += '<a href="https://www.foresttrip.go.kr/" onclick="fn_setKeyword(\''+item.arcd+'\',\''+(item.insttId == null ? "" : item.insttId)+'\',\''+item.codeNm+'\',\''+item.codeDc+'\'); return false;">'+item.codeNm + '</a>';
+                    });
+                    $(".preview_locate").html(rtnHtml);
+                    delayTimer = null;
+                },
+                error:function(xhr,status,e){
+                    fn_failMsg(xhr, status, e);
+                },
+                complete:function(){
+                    
+                }
+            });
+        }    
+    }
+
+    function fn_setKeyword(insttArcd, insttId, codeNm, codeDc) {
+        $("#srchInsttId").val(insttId);
+        
+        // 휴양시설 선택에 따라 Calendar 분기처리
+        if($("#srchInsttId").val() == '' || $("#srchInsttId").val() == null) {
+            fn_defaultCalendar();
+        } else {
+            fn_initCalendar($("#srchInsttId").val());
+        }
+        
+        // 휴양시설 변경 시 달력 초기화
+        /*
+        if($("#srchInsttId").val() != '' && $("#srchInsttId").val() != null) {
+            $("#rsrvtBgDt", "form[name='srch_frm']").val("");
+            $("#rsrvtEdDt", "form[name='srch_frm']").val("");
+            $("#calPicker", "form[name='srch_frm']").val("");
+            var btn = $('#calPicker');
+            btn.prev().show();            
+        }
+        */
+        //var btn = $('.yeyakSearchName');
+        //btn.focus().parent().removeClass('ov');
+        $(".preview_locate").html("");
+    }
+    
+    /*
+    function fn_setKeyword(insttArcd, insttId, codeNm, codeDc) {
+        $("#srchInsttArcd").val(insttArcd);
+        $("#srchInsttId").val(insttId);
+        $("#keyword").val(codeDc);
+        
+        // 휴양시설 선택에 따라 Calendar 분기처리
+        if($("#srchInsttId").val() == '' || $("#srchInsttId").val() == null) {
+            fn_defaultCalendar();
+        } else {
+            fn_initCalendar($("#srchInsttId").val());
+        }
+        
+        // 휴양시설 변경 시 달력 초기화
+        if($("#srchInsttId").val() != '' && $("#srchInsttId").val() != null) {
+            $("#rsrvtBgDt", "form[name='srch_frm']").val("");
+            $("#rsrvtEdDt", "form[name='srch_frm']").val("");
+            $("#calPicker", "form[name='srch_frm']").val("");
+            var btn = $('#calPicker');
+            btn.prev().show();            
+        }
+        
+        var btn = $('.yeyakSearchName');
+        btn.focus().parent().removeClass('ov');
+        $(".preview_locatey").html("");
+    }
+    */
+    
+    //조회 버튼 클릭 시, 휴양림에 목록 읽어오기
+    function fn_top_goSearch() {
+        blockLoading();
+        
+        // 헤더 검색조건 초기화
+        search_form_init();
+        
+        // 검색 시 예약가능 목록 조회
+        $("#rsrvtWtngSctin", "form[name='srch_frm']").val("01");
+        $("#gNowPage", "form[name='srch_frm']").val("1");
+        
+        var rsrvtBgDt = $("#rsrvtBgDt").val();
+        var rsrvtEdDt = $("#rsrvtEdDt").val();
+        // 휴양시설/지역에 따른 구분
+        if($("#srchInsttId").val() != "" && $("#srchInsttId").val() != null) {
+            $("#houseCampSctin").val("");
+        } else {
+            $("#houseCampSctin").val("01");
+        }
+        $("#goodsClsscHouseCdArr").val("");
+        $("#goodsClsscCampCdArr").val("");
+        
+        $("#srchStngNofpr").val(Number($("#stng_nofpr").html()));
+        $("#srchSthngCnt").val(fn_dateDiff(rsrvtBgDt.substring(4,6)+"/"+rsrvtBgDt.substring(6,8)+"/"+rsrvtBgDt.substring(0,4) ,rsrvtEdDt.substring(4,6)+"/"+rsrvtEdDt.substring(6,8)+"/"+rsrvtEdDt.substring(0,4)));
+        //$("#srchSthngCnt").val(fn_dateDiff(rsrvtBgDt.substring(0,4)+"-"+rsrvtBgDt.substring(4,6)+"-"+rsrvtBgDt.substring(6,8) ,rsrvtEdDt.substring(0,4)+"-"+rsrvtEdDt.substring(4,6)+"-"+rsrvtEdDt.substring(6,8)));
+        //$("#srchWord").val($("#keyword").val());
+        $("#srchUseDt").val($("#calPicker").val());
+        if($("#srchInsttArcd").val() == '' && $("#srchInsttId").val() == '') {
+            alert("지역을 먼저 선택 해 주세요."+_no_click_msg);
+            unBlockLoading();
+            return false;
+        }
+        if(rsrvtBgDt == '' || rsrvtEdDt == '') {
+            alert("이용일을 선택 해 주세요."+_no_click_msg);
+            unBlockLoading();
+            return false;
+        }
+        var url = null;
+        var action_id = null;
+        if($("#srchInsttId").val() == '' || $("#srchInsttId").val() == null) {
+            url = "/rep/or/fcfsRsrvtRcrfrDtlDetls.do";
+            action_id = "action1";
+        } else {
+            url = "/rep/or/sssn/fcfsRsrvtPssblGoodsDetls.do";
+            action_id = "action2";
+        }
+        
+        $("form[name='srch_frm']").attr("method", "get");
+        
+        NetFunnel_Action({action_id: action_id, service_id: "service_1"},
+            { success:function(ev, ret) {
+                $("#netfunnel_key", "form[name='srch_frm']").val(ret.data.key);// 암호화된 넷퍼넬 키
+                $("form[name='srch_frm']").attr("action", url).submit();
+            },
+            stop:function(ev,ret){
+                unBlockLoading();
+            },
+            error:function(ev,ret){
+                unBlockLoading();
+            }
+        });
+    
+    }
+    
+  //함수명: fnInitCmmnnCd
+  //설명: 초기 페이지용 공통코드 일괄 설정
+  //인자: 없음
+  //리턴: 없음
+  //검색용 객체를 생성한 후 배열에 추가하여 공통코드 조회서비스를 호출한다.
+  function fn_initCmmnnStngNofprCd() {
+      var arrPrmtr = new Array(); //Object를 배열로 저장할 Array
+      var objPrmtr = new Object(); //key, value형태로 저장할 Object
+
+      //인원수
+    objPrmtr = new Object();
+    objPrmtr.trgtObj = 'objNofpr';
+    objPrmtr.codeId = 'REP002';
+    objPrmtr.useYn = 'Y';
+    objPrmtr._csrf = '3de23664-d661-430b-ad70-cec44cf9f1fd';
+    arrPrmtr.push(objPrmtr);
+    $.ajax({
+        url:'/rep/cm/selectCmmnnCodeList.do',
+        type:'post',
+        dataType:'json',
+        contentType:'application/json; charset=UTF-8',
+        data:JSON.stringify(arrPrmtr),
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("X-Ajax-call", "true");                    
+        },
+        success:function(data){
+            //1개 조회할때랑, 1개이상 조회할때 다름.. 1개 조회할땐 data.으로 반복문 사용, 1개이상은 data.+trgtObj를 반복문을 사용한다.
+            //인원수 세팅
+            data.forEach(function(item, idx, arr){
+                $('#stngNofpr').append("<option value='"+item.detailCode+"'>"+item.codeNm+"</option>");
+            });
+        },
+        error:function(err) {
+            fn_failMsg(xhr, status, e);
+        },
+        complete:function() {
+            // 인원수3으로 초기화
+            $("#stngNofpr").val("3").prop("selected", true);
+        }
+    });
+  }
+
+  //함수명: fnInitCmmnnCd
+  //설명: 초기 페이지용 공통코드 일괄 설정
+  //인자: 없음
+  //리턴: 없음
+  //검색용 객체를 생성한 후 배열에 추가하여 공통코드 조회서비스를 호출한다.
+  function fn_initCmmnnCd(gbn) {
+    var arrPrmtr = new Array(); //Object를 배열로 저장할 Array
+    var objPrmtr = new Object(); //key, value형태로 저장할 Object
+    
+    var url = '';
+    if(gbn == 'integration') {
+        url = '/rep/cm/selectBaseGoodsClsscList.do';
+    } else {
+        url = '/rep/cm/selectGoodsClsscList.do';
+    }
+    
+    // 숙박시설
+    arrPrmtr = new Array();
+    objPrmtr = new Object();
+    objPrmtr.trgtObj = 'objGsrm';
+    objPrmtr.codeId = $("#srchInsttId").val();
+    objPrmtr.upperDetailCode = '01';
+    objPrmtr._csrf = '3de23664-d661-430b-ad70-cec44cf9f1fd';
+    arrPrmtr.push(objPrmtr);
+    $.ajax({
+        url:url,
+        type:'post',
+        dataType:'json',
+        contentType:'application/json; charset=UTF-8',
+        data:JSON.stringify(arrPrmtr),
+        async: false,
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("X-Ajax-call", "true");                    
+        },
+        success:function(data){
+            var rtnHtml = '';       
+            data.forEach(function(item, idx, arr){
+                rtnHtml += '<a  href="javascript:;">';
+                rtnHtml += '<label>';
+                rtnHtml += '<input type="checkbox" name="house" value="'+item.codeId+'" onclick="fn_goodsClsscHouse();"/><span></span>'+item.codeNm;
+                rtnHtml += '</label>';
+                rtnHtml += '</a>';
+            });
+            $('#gsrm').append(rtnHtml);          
+        },
+        error:function(err) {
+            fn_failMsg(xhr, status, e);
+        }
+    });
+    
+    // 야영장
+    arrPrmtr = new Array();
+    objPrmtr = new Object();
+    objPrmtr.trgtObj = 'objCmpgr';
+    objPrmtr.codeId = $("#srchInsttId").val();
+    objPrmtr.upperDetailCode = '02';
+    objPrmtr._csrf = '3de23664-d661-430b-ad70-cec44cf9f1fd';
+    arrPrmtr.push(objPrmtr);
+    $.ajax({
+        url:url,
+        type:'post',
+        dataType:'json',
+        contentType:'application/json; charset=UTF-8',
+        data:JSON.stringify(arrPrmtr),
+        async: false,
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("X-Ajax-call", "true");                    
+        },
+        success:function(data){
+            var rtnHtml = '';       
+            data.forEach(function(item, idx, arr){
+                rtnHtml += '<a  href="javascript:;">';
+                rtnHtml += '<label>';
+                rtnHtml += '<input type="checkbox" name="camp" value="'+item.codeId+'" onclick="fn_goodsClsscCamp();"/><span></span>'+item.codeNm;
+                rtnHtml += '</label>';
+                rtnHtml += '</a>';
+            });
+            $('#cmpgr').append(rtnHtml);          
+        },
+        error:function(err) {
+            fn_failMsg(xhr, status, e);
+        }
+    });
+  }
+
+  //함수명: fnInitCmmnnCd
+  //설명: 초기 페이지용 공통코드 일괄 설정
+  //인자: 없음
+  //리턴: 없음
+  //검색용 객체를 생성한 후 배열에 추가하여 공통코드 조회서비스를 호출한다.
+  function fn_initCmmnnCd_House() {
+      var arrPrmtr = new Array(); //Object를 배열로 저장할 Array
+      var objPrmtr = new Object(); //key, value형태로 저장할 Object
+      
+      
+      // 숙박시설
+      arrPrmtr = new Array();
+      objPrmtr = new Object();
+      objPrmtr.trgtObj = 'objGsrm';
+      objPrmtr.codeId = $("#srchInsttId").val();
+      objPrmtr.upperDetailCode = '01';
+      arrPrmtr.push(objPrmtr);
+      $.ajax({
+          url:'/rep/cm/selectGoodsClsscList.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd',
+          type:'post',
+          dataType:'json',
+          contentType:'application/json; charset=UTF-8',
+          data:JSON.stringify(arrPrmtr),
+          async: false,
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader("X-Ajax-call", "true");                    
+          },
+          success:function(data){
+              var rtnHtml = ''; 
+              rtnHtml += '<label class="chackbox_all">';
+              rtnHtml += '<input type="checkbox" id="check_house_all" name="house" value="" onclick="fn_goodsClssc_click(\'all\');"  checked="checked"/>'+'전체';
+              rtnHtml += '</label>';
+              data.forEach(function(item, idx, arr){
+                  rtnHtml += '<label>';
+                  rtnHtml += '<input type="checkbox" name="house" value="'+item.codeId+'" onclick="fn_goodsClssc_click();" class="goods_clssc_house" checked="checked"/>'+item.codeNm;
+                  rtnHtml += '</label>';
+              });
+              $('#gsrm').append(rtnHtml);          
+          },
+          error:function(err) {
+              fn_failMsg(xhr, status, e);
+          }
+      });
+  }
+
+  function fn_initCmmnnCd_Camp() {
+      var arrPrmtr = new Array(); //Object를 배열로 저장할 Array
+      var objPrmtr = new Object(); //key, value형태로 저장할 Object
+      
+      // 야영장
+      arrPrmtr = new Array();
+      objPrmtr = new Object();
+      objPrmtr.trgtObj = 'objCmpgr';
+      objPrmtr.codeId = $("#srchInsttId").val();
+      objPrmtr.upperDetailCode = '02';
+      arrPrmtr.push(objPrmtr);
+      $.ajax({
+          url:'/rep/cm/selectGoodsClsscList.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd',
+          type:'post',
+          dataType:'json',
+          contentType:'application/json; charset=UTF-8',
+          data:JSON.stringify(arrPrmtr),
+          async: false,
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader("X-Ajax-call", "true");                    
+          },
+          success:function(data){
+              var rtnHtml = ''; 
+              rtnHtml += '<label class="chackbox_all">';
+              rtnHtml += '<input type="checkbox" id="check_camp_all" name="camp" value="" onclick="fn_goodsClssc_click(\'all\');" checked="checked" />'+'전체';
+              rtnHtml += '</label>';
+              data.forEach(function(item, idx, arr){
+                  rtnHtml += '<label>';
+                  rtnHtml += '<input type="checkbox" name="camp" value="'+item.codeId+'" onclick="fn_goodsClssc_click();" class="goods_clssc_camp" checked="checked" />'+item.codeNm;
+                  rtnHtml += '</label>';
+              });
+              $('#cmpgr').append(rtnHtml);          
+          },
+          error:function(err) {
+              fn_failMsg(xhr, status, e);
+          }
+      });
+  }
+
+  function fn_defaultCalendar() {
+      var toDay = "";
+      $.ajax({
+          url: "/com/selectTodayCalendar.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd",
+          type:'get',
+          dataType:'json',
+          contentType : 'application/json; charset=UTF-8',
+          async: false,
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader("X-Ajax-call", "true");                    
+          },
+          success: function(data) {
+              toDay = data.result;
+          },
+          error:function(xhr,status,e) {
+              fn_failMsg(xhr, status, e);
+          },
+          complete:function() {
+          }
+      });
+      $("#calPicker").off('.ajaxSuccess2').on("click.ajaxSuccess2 keydown.ajaxSuccess2", function(event) {
+          if (event.keyCode == 13) {
+              event.preventDefault();
+              addPicker($("#calPicker"), false, false, '', '', '', '', toDay);
+          }
+          if (event.type != 'keydown') {
+              addPicker($("#calPicker"), false, false, '', '', '', '', toDay);
+          }
+      });
+  }
+
+  function fn_initCalendar(insttId) {
+      var toDay = "";
+      $.ajax({
+          url: "/com/selectTodayCalendar.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd",
+          type:'get',
+          dataType:'json',
+          contentType : 'application/json; charset=UTF-8',
+          async: false,
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader("X-Ajax-call", "true");                    
+          },
+          success: function(data) {
+              toDay = data.result;
+          },
+          error:function(xhr,status,e) {
+              fn_failMsg(xhr, status, e);
+          },
+          complete:function() {
+          }
+      });
+
+      $.ajax({
+          url : "/rep/or/selectFcFsRcfrsFcltInfo.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd&insttId="+insttId,
+          type:'get',
+          dataType: 'json',
+          async:false,
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader("X-Ajax-call", "true");                    
+          },
+          contentType:'application/json; charset=UTF-8',
+          success: function(data){
+              if (data.useDtList.length > 0) {
+                  $("#calPicker").off('.ajaxSuccess1').on("click.ajaxSuccess1 keydown.ajaxSuccess1", function (event) {
+                      if (event.keyCode == 13) {
+                          event.preventDefault();
+                          addPicker($("#calPicker"), false, false, '', data.hldtList, data.rcfrsFcltInfo[0].mxmmStngDayCnt, data.useDtList, toDay);
+                      }
+                      if (event.type != 'keydown') {
+                          addPicker($("#calPicker"), false, false, '', data.hldtList, data.rcfrsFcltInfo[0].mxmmStngDayCnt, data.useDtList, toDay);
+                      }
+                  });
+              } else {
+                  fn_defaultCalendar();
+              }   
+          },
+          error:function(xhr,status,e){
+              fn_failMsg(xhr, status, e);
+          },
+          complete:function(){
+          }
+      });
+  }
+  
+  function search_form_init() {
+      $("#srchWord", "form[name='srch_frm']").val("");
+      $("#srchUseDt", "form[name='srch_frm']").val("");
+      $("#rsrvtPssblYn", "form[name='srch_frm']").val("");
+      $("#srchHouseCharg", "form[name='srch_frm']").val("");
+      $("#srchCampCharg", "form[name='srch_frm']").val("");
+      $("#bbqYn", "form[name='srch_frm']").val("N");
+      $("#dsprsYn", "form[name='srch_frm']").val("N");
+      $("#otsdWeterYn", "form[name='srch_frm']").val("N");
+      $("#wifiYn", "form[name='srch_frm']").val("N");
+      $("#snowPlaceYn", "form[name='srch_frm']").val("N");
+      $("#srchMyLtd", "form[name='srch_frm']").val("");
+      $("#srchMyLng", "form[name='srch_frm']").val("");
+      $("#srchDstnc", "form[name='srch_frm']").val("");
+      $("#netfunnel_key", "form[name='srch_frm']").val("");
+  }
+
+  function main_form_init() {
+      $("#srchWord", "form[name='frm']").val("");
+      $("#srchUseDt", "form[name='frm']").val("");
+      $("#rsrvtPssblYn", "form[name='frm']").val("");
+      $("#srchHouseCharg", "form[name='frm']").val("");
+      $("#srchCampCharg", "form[name='frm']").val("");
+      $("#bbqYn", "form[name='frm']").val("N");
+      $("#dsprsYn", "form[name='frm']").val("N");
+      $("#otsdWeterYn", "form[name='frm']").val("N");
+      $("#wifiYn", "form[name='frm']").val("N");
+      $("#snowPlaceYn", "form[name='frm']").val("N");
+      $("#srchMyLtd", "form[name='frm']").val("");
+      $("#srchMyLng", "form[name='frm']").val("");
+      $("#srchDstnc", "form[name='frm']").val("");
+      $("#netfunnel_key", "form[name='frm']").val("");
+
+  }
+  /*
+  함수명: fn_dateDiff
+  설명: 박수 계산
+  인자: 종료일YYYYMMDD, 시작일YYYYMMDD
+  리턴: 입력된 시작일/종료일 기준의 박수
+  */
+  function fn_dateDiff(_date1, _date2) {
+      var diffDate_1 = _date1 instanceof Date ? _date1 : new Date(_date1);
+      var diffDate_2 = _date2 instanceof Date ? _date2 : new Date(_date2);
+      diffDate_1 = new Date(diffDate_1.getFullYear(), diffDate_1.getMonth(), diffDate_1.getDate());
+      diffDate_2 = new Date(diffDate_2.getFullYear(), diffDate_2.getMonth(), diffDate_2.getDate());
+      var diff = Math.abs(diffDate_2.getTime() - diffDate_1.getTime());
+      diff = Math.ceil(diff / (1000 * 3600 * 24));
+      return diff;
+  }
+
+  //콤마표시 
+  function commify(n) {
+      var reg = /(^[+-]?\d+)(\d{3})/;     // 정규식
+      n += '';                            // 숫자를 문자열로 변환
+      while (reg.test(n))
+          n = n.replace(reg, '$1' + ',' + '$2');
+      return n;
+  }
+
+  //콤마제거
+  function removeComma(str){
+      n = parseInt(str.replace(/,/g,""));
+      return n;
+  }
+
+  //숫자체크(숫자만)
+  function fn_cmn_inputNumCheckOnly(obj){
+      var myregexp = /^[0-9*]+$/;
+      if(obj.value.length > 0 && !myregexp.test(obj.value)) {
+          obj.blur();
+          alert("숫자만 입력가능 합니다."+_no_click_msg);
+          obj.value = "";
+          obj.focus();
+      }
+  }
+
+  function fn_date_format(yyyymmdd, format) {
+      return yyyymmdd.substring(0,4)+format+yyyymmdd.substring(4,6)+format+yyyymmdd.substring(6,8);
+  }
+
+  function calcAge(birth) {
+      var date = new Date();
+      var year = date.getFullYear();
+      var month = (date.getMonth() + 1);
+      var day = date.getDate();
+      if (month < 10)
+          month = '0' + month;
+      if (day < 10)
+          day = '0' + day;
+      var monthDay = month + day;
+      birth = birth.replace('-', '').replace('-', '');
+      var birthdayy = birth.substr(0, 4);
+      var birthdaymd = birth.substr(4, 4);
+      var age = monthDay < birthdaymd ? year - birthdayy - 1 : year - birthdayy;
+      return age;
+  } 
+
+  //함수명: fn_animateAndMove
+  //설명: 요청한 엘리먼트를 animate 후 해당 위치로 스크롤을 이동한다.
+  //인자: jquery 셀렉터
+  //리턴: 없음
+  //요청한 엘리먼트를 animate 후 해당 위치로 스크롤을 이동한다.
+  function fn_animateAndMove(itemSelector){
+    var item = $(itemSelector);
+
+    item.slideDown(300, 'easeOutCubic',function () {
+          var box_position = item.offset();
+          $('html, body').stop(0, 1).animate({ scrollTop : box_position.top - 180 }, 1000, 'easeOutExpo');
+      });
+  }
+
+  function validateForm(form){
+      var success = true;
+      
+      jQuery(form).find("[lang*=required]").each(function() {
+          if(jQuery(this).is("input[type=text]") || jQuery(this).is("input[type=hidden]") || jQuery(this).is("select") || jQuery(this).is("textarea")){
+                  if(jQuery(this).val() == ""){
+                      alert(jQuery(this).attr("title") + "은(는) 필수 입력항목 입니다."+_no_click_msg);
+                      success = false;
+                      jQuery(this).focus();
+                      return false;
+                  }
+          } else if(jQuery(this).is("input[type=radio]")){
+              if(!jQuery("input[name="+jQuery(this).attr('name')+"]").is(":checked")){
+                  alert(jQuery(this).attr("title") + "은(는) 필수 입력항목 입니다."+_no_click_msg);
+                  success = false;
+                  jQuery(this).focus();
+                  return false;
+              }
+          } else if(jQuery(this).is("input[type=checkbox]")) {
+              if(!jQuery("input[name="+jQuery(this).attr('name')+"]").is(":checked")){
+                  alert(jQuery(this).attr("title") + "은(는) 필수 입력항목 입니다."+_no_click_msg);
+                  success = false;
+                  jQuery(this).focus();
+                  return false;
+              }
+          }
+      });
+      
+      if(success){
+          jQuery(form).find("[lang*=number]").each(function() {
+              if(jQuery(this).is("input[type=text]")){
+                  if(isNaN(jQuery(this).val())){
+                      alert(jQuery(this).attr("title") + "은(는) 숫자만 입력 가능합니다."+_no_click_msg);
+                      success = false;
+                      jQuery(this).focus();
+                      return false;
+                  }
+              }
+          });
+      }
+      
+      if(success){
+          jQuery(form).find("[lang*=double]").each(function() {
+              if(jQuery(this).is("input[type=text]")){
+                  var lengthIndex = jQuery(this).attr("lang").indexOf("double");
+                  var maxlength = jQuery(this).attr("lang").substring(lengthIndex).replace("double","");
+                  var chk = /^[+-]?\d*(\.?)(\d*)$/;
+                  if(!chk.test(jQuery(this).val())){
+                      alert(jQuery(this).attr("title") + "은(는) 숫자만 입력 가능합니다."+_no_click_msg);
+                      success = false;
+                      jQuery(this).focus();
+                      return false;
+                  } else {
+                      if(jQuery(this).val().indexOf(".") != -1){
+                          if(jQuery(this).val().substr(jQuery(this).val().indexOf(".")+1).length > maxlength){
+                              alert(jQuery(this).attr("title") + "은(는) 소수점 최대 "+ maxlength +"자리까지 입력 가능합니다."+_no_click_msg);
+                              success = false;
+                              jQuery(this).focus();
+                              return false;
+                          }
+                      }
+                  }
+              }
+          });
+      }
+      
+      return success;
+  }
+</script>
+
+<div id="flowting_search">
+
+    <form id="srch_frm" name="srch_frm" action="/rep/or/fcfsRsrvtMain.do" method="post" >
+        <input type="hidden" name="_csrf" value="3de23664-d661-430b-ad70-cec44cf9f1fd" />
+        <input type="hidden" name="srchInsttArcd" id="srchInsttArcd" value="" />
+        
+        
+        
+        <input type="hidden" name="srchInsttId" id="srchInsttId" value="" />
+        
+        
+        <input type="hidden" name="srchRsrvtBgDt" id="rsrvtBgDt" value="" />
+        <input type="hidden" name="srchRsrvtEdDt" id="rsrvtEdDt" value="" />
+        <input type="hidden" name="srchStngNofpr" id="srchStngNofpr" value="0" />
+        <input type="hidden" name="srchSthngCnt" id="srchSthngCnt" value="0" />
+        <input type="hidden" name="srchWord" id="srchWord" value="" />
+        <input type="hidden" name="srchUseDt" id="srchUseDt" value="" />
+        <input type="hidden" name="netfunnel_key" id="netfunnel_key"/>
+        
+        <input type="hidden" id="houseCampSctin" name="houseCampSctin" value="01" />
+        <input type="hidden" id="rsrvtPssblYn" name="rsrvtPssblYn" value="N" />
+        <input type="hidden" id="rsrvtWtngSctin" name="rsrvtWtngSctin" value="01" />
+        <input type="hidden" name="srchHouseCharg" id="srchHouseCharg" value="">
+        <input type="hidden" name="srchCampCharg" id="srchCampCharg" value="">    
+        <input type="hidden" id="goodsClsscHouseCdArr" name="goodsClsscHouseCdArr" value="" />
+        <input type="hidden" id="goodsClsscCampCdArr" name="goodsClsscCampCdArr" value="" />
+        <input type="hidden" id="srchInsttTpcd" name="srchInsttTpcd" value="" />
+        
+        <input type="hidden" id="cmdogYn" name="cmdogYn" value="N" />
+        <input type="hidden" id="bbqYn" name="bbqYn" value="N" />
+        <input type="hidden" id="dsprsYn" name="dsprsYn" value="N" />
+        <input type="hidden" id="otsdWeterYn" name="otsdWeterYn" value="N" />
+        <input type="hidden" id="wifiYn" name="wifiYn" value="N" />
+        <input type="hidden" id="snowPlaceYn" name="snowPlaceYn" value="N" />
+        
+        <input type="hidden" id="srchMyLtd" name="srchMyLtd" value="" />
+        <input type="hidden" id="srchMyLng" name="srchMyLng" value="" />
+        <input type="hidden" id="srchDstnc" name="srchDstnc"  value="">
+        <input type="hidden" id="gNowPage" name="gNowPage" value="1"/>
+        <input type="hidden" id="srchGoodsId" name="srchGoodsId" value=""/>
+        <input type="hidden" name="menuId" value="001001">
+        <input type="hidden" name="hmpgId" value="FRIP" />
+
+        <div class="fs_wrap">
+            <div class="ht_util" >
+                <strong class="util_ti">
+                    <a class="" href="/com/index.do"><img src="https://image.foresttrip.go.kr/portal/images/layout/ut_top_logo.png" alt="숲나들이"></a>
+                </strong>
+            </div>
+            <div class="layout">
+                <div class="fs_mid">
+                    <div class="preview_wrap locate">
+                        <div class="fs_mid_1 input">
+                            
+                            
+                            
+                                <div class="label"><a href="https://www.foresttrip.go.kr" onclick="return false;" title="지역을 선택해주세요." class="yeyakSearchName"><img src="https://image.foresttrip.go.kr/portal/images/layout/fs_icon_0.png" alt=""><span id="srch_region_txt"> 지역</span></a></div>
+                            
+                            
+                        </div>
+                        <div id="srch_region" class="preview_locate">
+                        </div>
+                    </div>
+                    <div class="preview_wrap name">
+                        <div class="fs_mid_1 input">
+                            
+                            
+                            
+                                <div class="label"><a href="https://www.foresttrip.go.kr" onclick="return false;" title="지역을 선택해주세요." class="yeyakSearchName"><img src="https://image.foresttrip.go.kr/portal/images/layout/fs_icon_1.png" alt="">&nbsp;<span id="srch_rcfcl_txt">전체</span></a></div>
+                            
+                        
+                        </div>
+                        <div id="srch_rcfcl" class="preview_locate">
+                        </div>
+                    </div>
+
+                    <div class="fs_mid_2 input">
+                        <label for="calPicker"><img src="https://image.foresttrip.go.kr/portal/images/layout/fs_icon_2.png" alt=""> 날짜선택</label>
+                        <input type="text" id="calPicker" name="calPicker" class="center" title="이용일" readOnly="readonly" />
+                    </div>
+                    
+                    <div class="fs_mid_3">
+                        <div class="fs_cost_wrap">
+                            <div class="fs_cost_label"><img src="https://image.foresttrip.go.kr/portal/images/layout/fs_icon_3.png" alt=""> 인원</div>
+                            <div class="fs_cost_pt">
+                                <a href="https://www.foresttrip.go.kr" onclick="return false;" class="minus" id="minus_stng_nofpr"><span class="hide">감소</span></a>
+                                <span id="stng_nofpr" class="cost">2</span>
+                                <a href="https://www.foresttrip.go.kr" onclick="return false;" class="plus" id="plus_stng_nofpr"><span class="hide">증가</span></a>
+                            </div>
+                        </div>
+                        <div class="fs_btn">
+                            <button onclick="fn_top_goSearch(); return false;"><img src="https://image.foresttrip.go.kr/portal/images/layout/fs_cost_submit.png" alt="입력한 내용으로 예약 조회"></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="fs_util">
+                    <a href="https://www.foresttrip.go.kr" class="totSch_btn"><img src="https://image.foresttrip.go.kr/portal/images/layout/fs_util_search.png" alt="통합검색"></a>
+                    <a href="https://www.foresttrip.go.kr" class="share"><img src="https://image.foresttrip.go.kr/portal/images/layout/fs_util_my.png" alt="나의메뉴"></a>
+                    <div class="myPage my_menu">
+                        <strong class="myPageTi"><img src="https://image.foresttrip.go.kr/portal/images/layout/ut_top_my.png" alt="마이페이지 이미지">마이페이지</strong>
+                        <ul class="my_list" id="my_list_navi">
+                        </ul>
+                        <button class="close_box"><span class="hide">닫기</span></button>
+                    </div>
+                    <a href="https://www.foresttrip.go.kr" class="sitemap_btn"><img src="https://image.foresttrip.go.kr/portal/images/layout/fs_util_sitemap.png" alt="사이트맵"></a>
+                </div>
+            </div>
+            <div class="fs_open">
+                <a title="open" href="https://www.foresttrip.go.kr">예약조회 열기 <img src="https://image.foresttrip.go.kr/portal/images/layout/fs_open.png" alt="열기"></a>
+                <a title="close" href="https://www.foresttrip.go.kr">예약조회 닫기 <img src="https://image.foresttrip.go.kr/portal/images/layout/fs_close.png" alt="닫기"></a>
+            </div>
+        </div>
+    </form>
+</div>
+    
+    
+ 
+        
+    
+    
+    
+
+
+<script>
+$(document).ready(function(){
+    var hmpgId = "FRIP";
+    var menuId = "002001";
+    console.log(hmpgId);
+    console.log(menuId);
+    
+    if(hmpgId != "" && menuId != "") {
+        fn_naviViewNew(hmpgId, menuId);
+    }else{
+        console.log("메뉴ID가 존재하지 않습니다. 메뉴ID를 추가하여 주십시오.");
+    }
+}); 
+
+var currMenuLvl = 0;
+
+function fn_naviViewNew(hmpgId, menuId) {
+    
+    currMenuLvl = menuId.length/3;
+    var currlink =  document.location.pathname;
+    var searchlink = 'pot/is/gs/selectGnrlSrchView.do';
+    var homeurl = "/main.do";
+    if(hmpgId == 'FRTRL'){
+        homeurl = '/frtrlMain.do';
+    }else if( hmpgId == 'LEPORTS'){
+        homeurl = '/mnfrsLeportsMain.do';
+    }
+    
+    var locationhtml = '<div id="sub-location"><div class="location"><ul class="loc_append"><li class="home"><a class="locate_home" href="'+homeurl+'" ><img src="/portal/images/layout/ico_home.png" alt="메인으로 돌아가기"></a></li></ul></div></div>';
+    $(".navi_empty").append(locationhtml);
+    
+    var topLink = "";
+    
+    if(currMenuLvl > 0) {
+        //1차메뉴
+        topLink = "";
+        
+        $.ajax({
+            url:'/com/selectBreadcrumbMenu.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd',
+            type:'post',
+            async: false,
+            data:{"hmpgId":hmpgId, "upperMenuId": "-1"},
+            dataType:'json',
+            contentType : 'application/x-www-form-urlencoded',
+            success:function(data){
+                var breadcurmbList = data.breadcurmList; 
+                //navigator 메뉴 구성
+                breadcurmbList.forEach(function(item, idx) {
+                    var itmMenuId = item.menuId;
+                    var itmMenuNm = item.menuNm;
+                    var itmMenuUrl = item.menuUrl;
+                    
+                    if(menuId.substr(0,3) == itmMenuId) {
+                        if(menuId.substr(0,3) == '007'){  //통합검색 제외
+                            topLink = '<li><a href="javascript:;">'+itmMenuNm+'</a></li>';
+                        }else{
+                            topLink = '<li><a href="'+itmMenuUrl+'">'+itmMenuNm+'</a></li>';
+                            
+                        }
+                        
+                    }
+                });  
+                
+                $(".loc_append").append(topLink);
+                
+                if(currMenuLvl > 1) {
+                    //2차메뉴    
+                    topLink = "";
+                    
+                    var upperMenuId = menuId.substr(0,3);
+                    $.ajax({
+                        url:'/com/selectBreadcrumbMenu.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd',
+                        type:'post',
+                        async: false,
+                        data:{"hmpgId":hmpgId, "upperMenuId":upperMenuId},
+                        dataType:'json',
+                        contentType : 'application/x-www-form-urlencoded',
+                        success:function(data){
+                            var breadcurmbList2 = data.breadcurmList; 
+                            //navigator 메뉴 구성
+                            breadcurmbList2.forEach(function(item, idx) {
+                                var itmMenuId = item.menuId;
+                                var itmMenuNm = item.menuNm;
+                                var itmMenuUrl = item.menuUrl;
+                                
+                                
+                                if(menuId.substr(0,6) == itmMenuId) {
+                                    if(currlink.indexOf(searchlink) != -1){ //통합검색 제외
+                                        topLink = '<li><a href="javascript:;">'+itmMenuNm+'</a></li>';
+                                    }else{
+                                        topLink = '<li><a href="'+itmMenuUrl+'">'+itmMenuNm+'</a></li>';
+                                    }
+                                    
+                                }
+                                
+                            });  
+                            
+                            $(".loc_append").append(topLink);
+                            
+                            if(currMenuLvl > 2) {
+                                //3차메뉴
+                                topLink = "";
+                                
+                                var upperMenuId = menuId.substr(0,6);
+                                
+                                $.ajax({
+                                    url:'/com/selectBreadcrumbMenu.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd',
+                                    type:'post',
+                                    async: false,
+                                    data:{"hmpgId":hmpgId, "upperMenuId":upperMenuId},
+                                    dataType:'json',
+                                    contentType : 'application/x-www-form-urlencoded',
+                                    success:function(data){
+                                        var breadcurmbList3 = data.breadcurmList; 
+                                        //navigator 메뉴 구성
+                                        breadcurmbList3.forEach(function(item, idx) {
+                                            var itmMenuId = item.menuId;
+                                            var itmMenuNm = item.menuNm;
+                                            var itmMenuUrl = item.menuUrl;
+                                            
+                                            if(menuId.substr(0,9) == itmMenuId) {
+                                                topLink = '<li><a href="'+itmMenuUrl+'">'+itmMenuNm+' </a></li>';
+                                            }
+                                            
+                                        });  
+                                        
+                                        $(".loc_append").append(topLink);
+                                        
+                                    },
+                                    error:function(err) {
+                                        
+                                    }
+                                });
+                               
+                            }
+                            
+                            
+                        },
+                        error:function(err) {
+                            
+                        }
+                    });
+                    
+                }
+                
+                
+            },
+            error:function(err) {
+                console.log("에러러")
+            }
+        });
+        
+    }
+}
+
+</script>
+
+<div class="navi_empty"></div>
+
+
+    
+    
+
+
+
+
+
+
+
+<script src="/js/jquery.event.drag-2.2.js"></script>
+ 
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=6183e9507e5f2dabb3583b5b7e61571e&libraries=services"></script>
+
+<script>
+$(function() {
+    $('#searchNm').val('');
+});
+
+function fn_search_change(target) {
+    if (!$(target).val()) {
+        $('.lb_place').text('시설명으로 검색해보세요!');
+    } else {
+        $('.lb_place').text('');
+    }
+}
+
+function fn_addRcrfr(insttId, insttNm, _this) {
+    
+    var rtnInt = fn_addIntrsRcrfr(insttId, insttNm);
+    
+    if(rtnInt == 1) {
+        $(_this).addClass('ov');
+    }else if(rtnInt == -1) {
+        $(_this).removeClass('ov');
+    }
+}
+
+var listCnt = 4;    //목록 갯수
+var tmpCnt;
+
+var mapContainer;
+var map;
+var positions;
+var bounds;
+var zoomControl;
+var mapTypeControl;
+var imageSrc = "/images/search/map_marker_02.png"; 
+var imageSize = new daum.maps.Size(29, 35); 
+var markerImage = new daum.maps.MarkerImage(imageSrc, imageSize); 
+
+
+    /******************************************************************  
+     * desc    : init function : 검색필터에서 선택한 태그값을 조회 후
+                                 화면 리셋 후 선택한 태그값을 다시 선택 하여준다.
+     * writter : ygs
+     ******************************************************************/
+    $(document).ready(function(){
+        // 인원구성, 예약혜택, 이용목적, 주변환경 선택한 태그 reload 후 다시 뿌려주기.
+        /*
+        var tagNm = "";
+        var tagNmArr = tagNm.split(",");
+    
+        for(var i=0 ; i < tagNmArr.length ; i++ ) {
+            var itm = tagNmArr[i];
+            $("#"+itm).prop("checked",true);
+            $("#lbl_"+itm).addClass("in_active");
+        }
+        */
+      
+        var parent = $('.swiper');
+        var Data = {};
+    
+        parent.find('a').on('click', function (event) {
+            
+            
+                if(!confirm("로그인 후 사용 가능한 기능입니다.\n로그인 화면으로 이동하시겠습니까?")) {
+                    return false;
+                }else{
+                    
+                    location.href="/com/login.do?targetUrl=/main.do?hmpgId=FRIP";
+                    
+                    
+                    return false;
+                }
+            
+            
+            event.preventDefault();
+            var t = $(this);
+            var idx = t.index();
+            t.parents('.swiper').find('.swipe_bar').width([0, 50, 100][idx]+'%');
+            t.parents('.swiper').find('.symbol').css({ 'left': [0, 50, 100][idx]+'%' });
+            
+            var sb = $(".symbol");
+            var dstnc = Math.round(sb.position().left / sb.parent().width() * 200);
+            var unit = "km";
+            
+            var dstncUnit = "전체";
+            
+            if(dstnc > 0) {
+                dstncUnit = dstnc + unit;
+            } 
+            
+            $('#myDstncLbl').text("내 주소로 부터 거리 : "+ dstncUnit);
+            $('#dstncVal').val(dstnc);
+            
+        });
+    
+        
+        
+        var dragYn = "N";
+        
+        parent.find('.symbol').on('dragstart', function (event) {
+            
+            if(dragYn == "N") {
+                dragYn = "Y";
+                if(!confirm("로그인 후 사용 가능한 기능입니다.\n로그인 화면으로 이동하시겠습니까?")) {
+                    dragYn = "N";
+                    return false;
+                }else{
+                    
+                    location.href="/com/login.do?targetUrl=/main.do?hmpgId=FRIP";
+                    
+                    
+                    return false;
+                }
+            }
+        });
+        
+        
+        
+        
+        if("" != "") {
+            $('#cal_picker_pot').prev().hide();
+            $("#cal_picker_pot").val(" ~ ");
+        }
+        
+        
+        /********************************** 지도부분 ********************************************/
+        
+        /********************************** 지도생성 ********************************************/
+        mapContainer = document.getElementById('mapApi'), // 지도를 표시할 div 
+        mapOption = {
+            center: new daum.maps.LatLng(35.95,128.25), // 지도의 중심좌표
+            level: 13 // 지도의 확대 레벨
+        }; 
+    
+        // 지도를 생성한다 
+        map = new daum.maps.Map(mapContainer, mapOption);
+        
+        /********************************** copyright위치 변경 ********************************************/
+        map.setCopyrightPosition(daum.maps.CopyrightPosition.BOTTOMRIGHT, true);
+        
+        /********************************** 마커생성 ********************************************/
+        
+        // 마커를 표시할 위치와 title 객체 배열입니다 
+        var positions = [
+                            
+                            {content : '<div class="map_info" id="site1" >' +
+                                            '<input type="hidden" id="ID02030002">' +
+                                            '<div class="info_wrap">' +
+                                            '<div class="info_close"><a href="#none" onclick="fn_tourInfoHide(' +  "'" + "ID02030002" + "'" + ')"><img src="/images/common/map_close.png" alt="마커 infowindow 닫기"></a></div>' +
+                                            '<div class="info_title">'+
+                                            ''+
+                                            '가리산 자연휴양림</div>' +
+                                            '<div class="info_locate">' +
+                                                '<a href="/pot/rm/ug/selectRsrvtGdncView.do?hmpgId=ID02030002&menuId=004001001&ruleId=101" target="_blank">예약안내</a> / ' +
+                                                '<a href="/pot/rm/ug/selectFcltUseGdncView.do?hmpgId=ID02030002&menuId=004002001&ruleId=201" target="_blank">이용안내</a> / ' +
+                                                '<a href="/pot/rm/ug/selectRsrvtTermsView.do?hmpgId=ID02030002&menuId=004003&ruleId=300" target="_blank">예약약관</a>' +
+                                            '</div>' +
+                                            '<div class="info_text">' +
+                                                '<div class="thumb"><img style="width:77px;height:70px;" src="https://image.foresttrip.go.kr/ino/instt/b770807e-c0cb-459d-a5af-b61bcb031316.jpg" alt="가리산 자연휴양림" onerror="this.src = \'/images/common/no_img.gif\'; this.alt = \'표시할 이미지 없습니다\';"></div>' +
+                                                '<ul class="pt">' +
+                                                    '<li class="icon_01"> 강원 홍천군 두촌면 가리산길 426 천현리 산 134-1</li>' +
+                                                    '<li class="icon_02"> 033-435-6034</li>' +
+                                                    
+                                                '</ul>' +
+                                            '</div>' +
+                                            
+                                            '<div class="info_button">' +
+                                                '<a href="https://garisan.foresttrip.go.kr" target="_blank"><span>홈페이지</span></a>' +
+                                            '</div>' +
+                                            
+                                        '</div>' +
+                                    '</div>',
+                                   title : '가리산 자연휴양림', 
+                                  latlng : new daum.maps.LatLng(37.86563599,127.98114925)},
+                            
+                            {content : '<div class="map_info" id="site2" >' +
+                                            '<input type="hidden" id="0113">' +
+                                            '<div class="info_wrap">' +
+                                            '<div class="info_close"><a href="#none" onclick="fn_tourInfoHide(' +  "'" + "0113" + "'" + ')"><img src="/images/common/map_close.png" alt="마커 infowindow 닫기"></a></div>' +
+                                            '<div class="info_title">'+
+                                            ''+
+                                            '가리왕산 자연휴양림</div>' +
+                                            '<div class="info_locate">' +
+                                                '<a href="/pot/rm/ug/selectRsrvtGdncView.do?hmpgId=0113&menuId=004001001&ruleId=101" target="_blank">예약안내</a> / ' +
+                                                '<a href="/pot/rm/ug/selectFcltUseGdncView.do?hmpgId=0113&menuId=004002001&ruleId=201" target="_blank">이용안내</a> / ' +
+                                                '<a href="/pot/rm/ug/selectRsrvtTermsView.do?hmpgId=0113&menuId=004003&ruleId=300" target="_blank">예약약관</a>' +
+                                            '</div>' +
+                                            '<div class="info_text">' +
+                                                '<div class="thumb"><img style="width:77px;height:70px;" src="https://image.foresttrip.go.kr/ino/instt/8ef66722-24d6-4548-a2bf-8aa58b0b5bed.jpg" alt="가리왕산 자연휴양림" onerror="this.src = \'/images/common/no_img.gif\'; this.alt = \'표시할 이미지 없습니다\';"></div>' +
+                                                '<ul class="pt">' +
+                                                    '<li class="icon_01"> 강원 정선군 정선읍 가리왕산로 791 </li>' +
+                                                    '<li class="icon_02"> 033-562-5833</li>' +
+                                                    
+                                                    '<li class="icon_03"> 휴무일 :   매주          화요일       </li>' +
+                                                    
+                                                '</ul>' +
+                                            '</div>' +
+                                            
+                                            '<div class="info_button">' +
+                                                '<a href="http://www.foresttrip.go.kr/0113" target="_blank"><span>홈페이지</span></a>' +
+                                            '</div>' +
+                                            
+                                        '</div>' +
+                                    '</div>',
+                                   title : '가리왕산 자연휴양림', 
+                                  latlng : new daum.maps.LatLng(37.42673703,128.56964347)},
+                            
+                            {content : '<div class="map_info" id="site3" >' +
+                                            '<input type="hidden" id="ID02030124">' +
+                                            '<div class="info_wrap">' +
+                                            '<div class="info_close"><a href="#none" onclick="fn_tourInfoHide(' +  "'" + "ID02030124" + "'" + ')"><img src="/images/common/map_close.png" alt="마커 infowindow 닫기"></a></div>' +
+                                            '<div class="info_title">'+
+                                            ''+
+                                            '갈모봉 자연휴양림</div>' +
+                                            '<div class="info_locate">' +
+                                                '<a href="/pot/rm/ug/selectRsrvtGdncView.do?hmpgId=ID02030124&menuId=004001001&ruleId=101" target="_blank">예약안내</a> / ' +
+                                                '<a href="/pot/rm/ug/selectFcltUseGdncView.do?hmpgId=ID02030124&menuId=004002001&ruleId=201" target="_blank">이용안내</a> / ' +
+                                                '<a href="/pot/rm/ug/selectRsrvtTermsView.do?hmpgId=ID02030124&menuId=004003&ruleId=300" target="_blank">예약약관</a>' +
+                                            '</div>' +
+                                            '<div class="info_text">' +
+                                                '<div class="thumb"><img style="width:77px;height:70px;" src="https://image.foresttrip.go.kr/ino/instt/6ad42a83-dce3-4f44-a439-7d8cf9a2262a.jpg" alt="갈모봉 자연휴양림" onerror="this.src = \'/images/common/no_img.gif\'; this.alt = \'표시할 이미지 없습니다\';"></div>' +
+                                                '<ul class="pt">' +
+                                                    '<li class="icon_01"> 경남 고성군 고성읍 갈모봉숲길 42 갈모봉 자연휴양림</li>' +
+                                                    '<li class="icon_02"> 055-670-5951</li>' +
+                                                    
+                                                    '<li class="icon_03"> 휴무일 :   매주          화요일       </li>' +
+                                                    
+                                                '</ul>' +
+                                            '</div>' +
+                                            
+                                            '<div class="info_button">' +
+                                                '<a href="https://www.foresttrip.go.kr/indvz/main.do?hmpgId=ID02030124" target="_blank"><span>홈페이지</span></a>' +
+                                            '</div>' +
+                                            
+                                        '</div>' +
+                                    '</div>',
+                                   title : '갈모봉 자연휴양림', 
+                                  latlng : new daum.maps.LatLng(34.97179758,128.2676173)},
+                            
+                            {content : '<div class="map_info" id="site4" >' +
+                                            '<input type="hidden" id="ID02030019">' +
+                                            '<div class="info_wrap">' +
+                                            '<div class="info_close"><a href="#none" onclick="fn_tourInfoHide(' +  "'" + "ID02030019" + "'" + ')"><img src="/images/common/map_close.png" alt="마커 infowindow 닫기"></a></div>' +
+                                            '<div class="info_title">'+
+                                            ''+
+                                            '강씨봉자연휴양림</div>' +
+                                            '<div class="info_locate">' +
+                                                '<a href="/pot/rm/ug/selectRsrvtGdncView.do?hmpgId=ID02030019&menuId=004001001&ruleId=101" target="_blank">예약안내</a> / ' +
+                                                '<a href="/pot/rm/ug/selectFcltUseGdncView.do?hmpgId=ID02030019&menuId=004002001&ruleId=201" target="_blank">이용안내</a> / ' +
+                                                '<a href="/pot/rm/ug/selectRsrvtTermsView.do?hmpgId=ID02030019&menuId=004003&ruleId=300" target="_blank">예약약관</a>' +
+                                            '</div>' +
+                                            '<div class="info_text">' +
+                                                '<div class="thumb"><img style="width:77px;height:70px;" src="https://image.foresttrip.go.kr/ino/instt/c139c94a-05d2-4474-9b29-4722d98d81f0.jpg" alt="강씨봉자연휴양림" onerror="this.src = \'/images/common/no_img.gif\'; this.alt = \'표시할 이미지 없습니다\';"></div>' +
+                                                '<ul class="pt">' +
+                                                    '<li class="icon_01"> 경기 가평군 북면 논남기길 520 강씨봉자연휴양림</li>' +
+                                                    '<li class="icon_02"> 031-8008-6611</li>' +
+                                                    
+                                                    '<li class="icon_03"> 휴무일 :   매주          화요일       </li>' +
+                                                    
+                                                '</ul>' +
+                                            '</div>' +
+                                            
+                                            '<div class="info_button">' +
+                                                '<a href="https://gangssibong.foresttrip.go.kr" target="_blank"><span>홈페이지</span></a>' +
+                                            '</div>' +
+                                            
+                                        '</div>' +
+                                    '</div>',
+                                   title : '강씨봉자연휴양림', 
+                                  latlng : new daum.maps.LatLng(37.96864507,127.40941378)},
+                                  
+                        ]; 
+        
+        
+            eval("var sessInsttId1" + "= 'ID02030002'");
+        
+            eval("var sessInsttId2" + "= '0113'");
+        
+            eval("var sessInsttId3" + "= 'ID02030124'");
+        
+            eval("var sessInsttId4" + "= 'ID02030019'");
+        
+        
+        if(positions.length > 0){
+            // 지도를 재설정할 범위정보를 가지고 있을 LatLngBounds 객체를 생성합니다
+            bounds = new daum.maps.LatLngBounds();
+            
+            for (var i = 0; i < positions.length; i ++) {
+                // 마커를 생성합니다
+                eval("var marker" + i + "= new daum.maps.Marker({ map: map, position: positions[i].latlng, image : markerImage })"); 
+        
+                // 마커에 표시할 인포윈도우를 생성합니다 
+                eval("var infowindow" + i + "= new daum.maps.InfoWindow({content: positions[i].content})"); 
+        
+                // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
+                // 이벤트 리스너로는 클로저를 만들어 등록합니다 
+                // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
+                daum.maps.event.addListener(eval('marker' + i), 'click', makeClickListener(map, eval('marker' + i), eval('infowindow' + i), eval(i), eval('sessInsttId' + (i+1))));
+                
+                // LatLngBounds 객체에 좌표를 추가합니다
+                bounds.extend(positions[i].latlng);
+            }
+            
+            // LatLngBounds 객체에 추가된 좌표들을 기준으로 지도의 범위를 재설정합니다
+            map.setBounds(bounds);
+        }
+         
+        /********************************** 줌기능 생성 ********************************************/
+        zoomControl = new daum.maps.ZoomControl();
+        map.addControl(zoomControl,daum.maps.ControlPosition.RIGHT);  // 줌기능
+        
+        /********************************** 스카이뷰 기능 생성 *************************************/
+        mapTypeControl = new daum.maps.MapTypeControl();
+        map.addControl(mapTypeControl,daum.maps.ControlPosition.TOPLEFT); // 스카이뷰 기능
+        
+        $("#mapApi").find('area').parent("map").each(function(i, e){
+            $(this).attr("id","marker" + i);
+        });
+        
+        if(positions.length > 0){
+            for (var i = 0; i < positions.length; i ++) {
+                $("#tr_" + (i + 1)).click(makeClickListener(map, eval('marker' + i), eval('infowindow' + i), eval(i), eval('sessInsttId' + (i+1))));
+            } 
+        }
+            
+        /******************************************************************  
+         * desc    : 클릭이벤트
+         * writter : ygs
+         ******************************************************************/
+        function makeClickListener(map, marker, infowindow, cnt, sessInsttId) {
+            return function() {
+                saveSession(sessInsttId);
+        
+                for (var i = 0; i < listCnt; i++) {
+                    eval('infowindow' + i).close();
+                    $("#marker" + i).prev().prev().attr("src", "/images/search/map_marker_02.png");
+                }
+                
+                
+                if(tmpCnt != cnt){
+                    //map.setLevel(2);
+                    infowindow.open(map, marker);
+                    tmpCnt = cnt;
+                    $("#marker" + cnt).prev().prev().attr("src", "/images/search/map_marker_02_ov.png");
+                }else{
+                    tmpCnt = null;
+                }
+            };
+        }
+        
+        /********************************** 지도부분 끝 ********************************************/
+    }); 
+    
+    /******************************************************************  
+    * desc    : 오버레이 닫기
+    * writter : ygs
+    ******************************************************************/
+    function fn_tourInfoHide(insttId){
+        $("#mapApi").find('img').each(function(){
+            if($(this).attr('src') == "/images/search/map_marker_02_ov.png"){
+                $(this).attr('src',"/images/search/map_marker_02.png");
+            }
+        });
+        
+        $("#" + insttId).parent("div").parent("div").parent("div").remove();
+     }
+
+    /******************************************************************  
+     * desc    : 결과내 검색
+     * writter : ygs
+     ******************************************************************/
+    function fn_selSort(sortType) {
+        
+        if(sortType == 'MY') {
+        
+            if(!confirm("로그인 후 사용 가능한 기능입니다.\n로그인 화면으로 이동하시겠습니까?")) {
+                return false;
+            }else{
+                
+                location.href="/com/login.do?targetUrl=/main.do?hmpgId=FRIP";
+                
+                
+                return false;
+            }
+        
+        }else if(sortType == 'ALL'){
+            $('#recomType').val('');
+        }
+        $('#nowPage').val("1");
+        
+        $('#sortType').val(sortType);
+        
+        fn_goSrch();
+    }
+    
+    function fn_selRecom(recomType) {
+        
+        $('#nowPage').val("1");
+        
+        if($('#recomType').val() == recomType) {
+            $('#recomType').val('');
+        }else{
+            $('#recomType').val(recomType);
+        }
+        
+        fn_goSrch();
+    }
+    
+    /******************************************************************  
+     * desc    : 관심시설 조회
+     * writter : ygs
+     ******************************************************************/
+    function fn_intrd() {
+        
+        
+        if(!confirm("로그인 후 사용 가능한 기능입니다.\n로그인 화면으로 이동하시겠습니까?")) {
+            
+            $("#intrdFclt").attr("checked", false);
+            return false;
+        }else{
+            
+            location.href="/com/login.do?targetUrl=/main.do?hmpgId=FRIP";
+            
+            
+            return false;
+        }
+        
+        
+        $("#nowPage").val('1');   
+        fn_goSrch();
+    }
+    
+    /******************************************************************  
+     * desc    : 내가본시설 조회
+     * writter : ygs
+     ******************************************************************/
+    function fn_myView() {
+        $("#nowPage").val('1');   
+        fn_goSrch();
+    }
+    
+    /******************************************************************  
+     * desc    : 산림휴양시설 검색 버튼 조회
+     * writter : ygs
+     ******************************************************************/
+    function fn_goSrchBtn() {         
+        $("#nowPage").val('1');
+        $("#initYn").val('Y');
+        fn_goSrch();
+    }
+    
+    /******************************************************************  
+     * desc    : 산림휴양시설 목록 조회
+     * writter : ygs
+     ******************************************************************/
+    function fn_goSrch() {
+        var useBgnDtm = "";
+        var useEndDtm = "";
+        
+        if($("#cal_picker_pot").val() != null){
+            var useBgnDtm = $("#cal_picker_pot").val().substring(0,10);
+            var useEndDtm = $("#cal_picker_pot").val().substring(13,23); 
+            
+            $("#useBgnDtm").val(useBgnDtm);    
+            $("#useEndDtm").val(useEndDtm);    
+        }else{
+            $("#useBgnDtm").val("");    
+            $("#useEndDtm").val("");
+        }
+         
+        var form = document.fcltSrchForm;
+        
+        form.action = "/pot/is/fs/selectFcltSrchView.do";
+        form.target = "_self";
+        form.method = "get";
+        form.submit();
+        
+    }
+
+    /******************************************************************  
+     * desc    : 페이지 선택 후 조회
+     * writter : ygs
+     ******************************************************************/
+    function fn_goPage(pageNum) {
+        $("#nowPage").val(pageNum);       
+        fn_goSrch();
+    }
+    
+    /******************************************************************  
+     * desc    : 이전페이지 조회
+     * writter : ygs
+     ******************************************************************/
+    function fn_goPrevPage() {
+        var minPage = 1;
+        
+        var pageNum = minPage-1
+        
+        if(pageNum < 1) {
+            pageNum = 1;
+        }
+        
+        $("#nowPage").val(pageNum);       
+        fn_goSrch();
+    }
+
+    /******************************************************************  
+     * desc    : 다음페이지 조회
+     * writter : ygs
+     ******************************************************************/
+    function fn_goNextPage() {
+        var maxPage = 10;
+        var totPage = 47;
+        
+        var pageNum = maxPage+1
+        
+        if(pageNum > totPage) {
+            pageNum = totPage;
+        }
+        
+        $("#nowPage").val(pageNum);       
+        fn_goSrch();
+    }
+
+    /******************************************************************  
+     * desc    : string 변환 함수
+     * writter : ygs
+     ******************************************************************/
+    function fn_replaceAll(str, searchStr, replaceStr) {
+        return str.split(searchStr).join(replaceStr);
+    }
+
+    function saveSession(insttNum) {
+        $.ajax({
+            url : '/pot/is/fs/saveSession.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd',
+            type : 'post',
+            async : false,
+            data : {"insttId" : insttNum},
+            dataType : 'json',
+            success : function() {
+            },
+            error : function(err) {
+    
+            }
+        });
+    }
+
+    function fn_transAddrLtdlng() {
+        // 주소-좌표 변환 객체를 생성합니다
+        var geocoder = new daum.maps.services.Geocoder();
+        
+        // 주소로 좌표를 검색합니다
+        //geocoder.addressSearch('대전광역시 서구 계백로 1312 제일빌딩 5층', function(result, status) {
+        geocoder.addressSearch('', function(result, status) {
+            // 정상적으로 검색이 완료됐으면 
+            if (status === daum.maps.services.Status.OK) {
+        
+                var coords = new daum.maps.LatLng(result[0].y, result[0].x);
+                
+                coords = ""+coords;
+                coords = coords.replace("(","").replace(")","").replace(" ","");
+                 
+                var coordsArr =  coords.split(",");
+                $("#myLtd").val(coordsArr[0]);
+                $("#myLng").val(coordsArr[1]);
+                
+            }else{
+                //alert("주소를 다시 입력하세요!"); 
+            }
+        });    
+    }
+        
+    /******************************************************************  
+     * desc    : 내주소로 부터 거리 체크박스 제어
+     * writter : ygs
+     ******************************************************************/    
+    function fn_dstnChk(id){
+        var chkAry = ["20","50","100","200"];
+        
+        for(var i=0 ; i < chkAry.length ; i++ ) {
+            var itm = chkAry[i];
+            
+            if(itm == id){
+                if($("#" + id).is(':checked') == true){
+                    $("#" + id).attr("checked",true);
+                    $("#lbl_" + id).addClass("in_active");
+                }else{
+                    $("#" + id).attr("checked",false);
+                    $("#lbl_" + id).removeClass("in_active");
+                }                
+            }else{
+                $("#" + itm).attr("checked",false);
+                $("#lbl_" + itm).removeClass("in_active");
+            }
+        }
+    }
+    
+    function fn_initCalendarBranch(objId, insttId, flag) {
+        var toDay = "";
+        $.ajax({
+            url: "/com/selectTodayCalendar.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd",
+            type:'get',
+            dataType:'json',
+            contentType : 'application/json; charset=UTF-8',
+            async: false,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-Ajax-call", "true");
+            },
+            success: function(data) {
+                toDay = data.result;
+            },
+            error:function(xhr,status,e) {
+                fn_failMsg(xhr, status, e);
+            },
+            complete:function() {
+            }
+        });
+
+        $.ajax({
+            url : "/rep/or/selectFcFsRcfrsFcltInfo.do?_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd&insttId="+insttId,
+            type : 'get',
+            dataType : 'json',
+            async : false,
+            contentType : 'application/json; charset=UTF-8',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-Ajax-call", "true");
+            },
+            success : function(data) {
+                if (data.useDtList.length > 0) {
+                    //$("#"+objId).off('.ajaxSuccess1').on("click.ajaxSuccess1 keydown.ajaxSuccess1", function (event) {
+                        if (event.keyCode == 13) {
+                            event.preventDefault();
+                            addPickerBranch($("#"+objId), false, false, '', data.hldtList, data.rcfrsFcltInfo[0].mxmmStngDayCnt, data.useDtList, toDay, flag);
+                        }
+                        if (event.type != 'keydown') {
+                            addPickerBranch($("#"+objId), false, false, '', data.hldtList, data.rcfrsFcltInfo[0].mxmmStngDayCnt, data.useDtList, toDay, flag);
+                        }
+                    //});
+                } else {
+                    fn_defaultCalendar();
+                }
+            },
+            error : function(xhr, status, e) {
+                fn_failMsg(xhr, status, e);
+            },
+            complete : function() {
+            }
+        });
+    }
+    
+    function fn_goRsvrtTheme(arcd, insttId, insttNm, flag, id) {
+        if (arcd != '' && arcd != null) {
+            $("#srchInsttArcd", "form[name='srch_frm']").val(arcd);
+        }
+        if (insttId != '' && insttId != null) {
+            $("#srchInsttId", "form[name='srch_frm']").val(insttId);
+        }
+        $("#srchWord", "form[name='srch_frm']").val(insttNm);
+
+        // 휴양시설/지역에 따른 구분
+        if ($("#srchInsttId").val() != "" && $("#srchInsttId").val() != null) {
+            $("#houseCampSctin", "form[name='srch_frm']").val("");
+        } else {
+            $("#houseCampSctin", "form[name='srch_frm']").val("01");
+        }
+        
+        $('#rsrvtBgDt').val('');
+        $('#rsrvtEdDt').val('');
+        
+        fn_initCalendarBranch(id, insttId, flag);    
+    }        
+        
+        
+    function fn_moveRsvrtTheme(flag) {
+        
+        if ($("#rsrvtBgDt", "form[name='srch_frm']").val() != '' && $("#rsrvtEdDt", "form[name='srch_frm']").val() != '') {
+            var rsrvtBgDt = $("#rsrvtBgDt", "form[name='srch_frm']").val();
+            var rsrvtEdDt = $("#rsrvtEdDt", "form[name='srch_frm']").val();
+    
+            $("#srchUseDt", "form[name='srch_frm']").val(cal_format(rsrvtBgDt) + "-" + cal_format(rsrvtEdDt));
+            $("#srchSthngCnt").val(fn_dateDiff(rsrvtBgDt.substring(4,6)+"/"+rsrvtBgDt.substring(6,8)+"/"+rsrvtBgDt.substring(0,4) ,rsrvtEdDt.substring(4,6)+"/"+rsrvtEdDt.substring(6,8)+"/"+rsrvtEdDt.substring(0,4)));
+            $("#srchStngNofpr", "form[name='srch_frm']").val(2);
+    
+            var url = "";
+            var moveUrl = "";
+            switch(flag) {
+                case "fcfsRsrvt" :
+                    url = "/rep/or/sssn/fcfsRsrvtPssblGoodsDetls.do";
+                    break;
+                case "vccpRsrvt" :
+                    moveUrl = "/rep/cndtl/cndtlRsrvtMain.do?infoFlag=Vccp&hmpgId=FRIP&menuId=001002003";
+                    break;
+                case "aseanRsrvt" :
+                    moveUrl = "/rep/cndtl/cndtlRsrvt.do?type=Asean&hmpgId=FRIP&menuId=001002002";
+                    break;
+                case "areaRsrvt" :
+                    moveUrl = "/rep/cndtl/cndtlRsrvt.do?type=Area&hmpgId=FRIP&menuId=001002005";
+                    break;
+                case "wkndDrlts" :
+                    moveUrl = "/rep/drlts/wknd/drltsMain.do?hmpgId=FRIP&menuId=001003001";
+                    break;
+                case "hdmssDrlts" :
+                    moveUrl = "/rep/drlts/hdmss/drltsMain.do?hmpgId=FRIP&menuId=001003003";
+                    break;
+                case "dsprsDrlts" :
+                    moveUrl = "/rep/drlts/dsprs/drltsMain.do?infoFlag=Dsprs&hmpgId=FRIP&menuId=001002004";
+                    break;
+                default :
+                    url = "/rep/or/sssn/fcfsRsrvtPssblGoodsDetls.do";
+                    break;
+            }
+            $("form[name='srch_frm']").attr("method", "get");
+            
+            NetFunnel_Action({action_id: "action2", service_id: "service_1"}, function(ev, ret) {
+                if(moveUrl == "") {
+                    $("#netfunnel_key", "form[name='srch_frm']").val(ret.data.key);// 암호화된 넷퍼넬 키
+                    $("form[name='srch_frm']").attr("action", url).submit();
+                } else {
+                    location.href = moveUrl;
+                }
+            });
+        }
+    }
+    
+    function fn_goPageMob(prevNext) {
+
+        var pageNum = 1;
+
+        if(prevNext == 'P'){
+            pageNum--;
+        }else{
+            pageNum++;
+        }
+
+        $("#nowPage").val(pageNum);       
+        fn_goSrch();
+    }
+</script>
+
+<div id="container">
+<form id="fcltSrchForm" name="fcltSrchForm" method="get" >
+    <h2 class="container_title">자연휴양림안내</h2>
+        <input type="hidden" id="nowPage" name="nowPage" value="1"/>
+        <input type="hidden" id="useBgnDtm" name="useBgnDtm" value=""/>
+        <input type="hidden" id="useEndDtm" name="useEndDtm" value=""/>
+        <input type="hidden" id="mmberId" name="mmberId" value=""/>
+        <input type="hidden" id="sortType" name="sortType" value="ALL"/>
+        <input type="hidden" id="recomType" name="recomType" value=""/>
+        
+        <input type="hidden" id="myLtd" name="myLtd" value=""/>
+        <input type="hidden" id="myLng" name="myLng" value=""/>
+        
+        <input type="hidden" id="initYn" name="initYn" value="N"/>
+        
+        <input type="hidden" id="hmpgId" name="hmpgId" value="FRIP"/>
+        <input type="hidden" id="menuId" name="menuId" value="002001"/>
+
+
+    <div class="multi_category multi_category_side layout">
+    	<div class="multi_search_bar multi_category_left">
+
+                <div class="search_block calendar">
+                
+                    <select name="srchArea" id="srchArea" title="지역을 선택하세요">
+                        <option value="">지역 선택</option>
+                        
+                        <option value="1" >서울/인천/경기</option>
+                        
+                        <option value="2" >강원</option>
+                        
+                        <option value="3" >충북</option>
+                        
+                        <option value="4" >대전/충남</option>
+                        
+                        <option value="5" >전북</option>
+                        
+                        <option value="6" >광주/전남</option>
+                        
+                        <option value="7" >대구/경북</option>
+                        
+                        <option value="8" >부산/경남</option>
+                        
+                        <option value="9" >제주</option>
+                        
+                    </select>
+                    <label style="display:none;" for="cal_picker_pot" data-hidden="1"><span class="sprity-search sprity-search-icon_calender"></span>  이용시작일 <img src="/images/search/cal_rarr.png" alt="&rarr;"> <span class="sprity-search sprity-search-icon_calender"></span> 이용종료일</label>
+                    <input style="display:none;" type="text" id="cal_picker_pot" value="" onclick="return addPickerPot(this);">
+
+                </div>
+
+ 
+                <div class="search_block text input">
+
+                    <label for="searchNm" class="lb_place">
+                    
+                                                                        시설명으로 검색해보세요!
+                    
+                    </label>
+                    <input name="searchNm" type="text" id="searchNm" title="시설명으로 검색해보세요!" value="" onchange="fn_search_change(this);">
+                    <button type="submit" onclick="fn_goSrchBtn();return false;"><span class="sprity-search sprity-search-icon_btn"></span><span class="hide">검색</span></button>
+                </div>
+
+                <div class="my_search_open" style="display: none;">
+
+                    <a href="https://www.foresttrip.go.kr" onclick="return false;">맞춤 검색을 해보세요!</a>
+
+                    <div id="categoryCloseParent" class="category_tab">
+
+                        <div class="filter_title">
+                            원하시는 조건으로<br> 검색결과내 검색을 해 보세요.
+                        </div>
+                        
+                        <div class="tab_body">
+                            
+                            <!-- <div class="body_item">
+                            
+                                <div class="item_title">
+                                
+                                    <span class="label">인원수</span>
+                                </div>
+                                    
+                                <div class="item_increase">
+                                    <a class="inc" href="#"><span class="sprity-search sprity-search-icon_minus"></span><span class="hide">인원수 감소</span></a>
+                                    <b title="인원수" class="people_num">2</b>
+                                    <a class="dec" href="#"><span class="sprity-search sprity-search-icon_plus"></span><span class="hide">인원수 증가</span></a>
+                                </div>
+
+                            </div> -->
+
+
+                            
+                            
+                            <div class="body_item">
+                                <input type="hidden" id="dstncVal" name="dstncVal" value="0"/>
+
+                                <div class="item_title">
+                                    <span class="label" id="myDstncLbl">
+                                    
+                                    내 주소로 부터 거리 : 전체
+                                    
+                                    
+                                    </span>
+                                </div>
+                                <div class="item_pt">
+                                    <div class="swiper">
+                                        <div class="symbol" tabindex="0" style="left:0.0%;"><img src="/images/search/icon_slide.png" alt="슬라이드 이동 버튼"></div>
+                                        <div class="swipe_bar" style="width:0.0%;"><!-- <span class="hide"><span class="num">20</span>만원</span> --></div>
+                                        <span>
+                                            <a class="st" href="https://www.foresttrip.go.kr" onclick="return false;">전체</a>
+                                            <a class="mid" href="https://www.foresttrip.go.kr" onclick="return false;">100km<span class="hide">이내</span></a>
+                                            <a class="ed" href="https://www.foresttrip.go.kr" onclick="return false;">200km<span class="hide">이내</span></a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 
+                            <div class="body_item">
+
+                                <div class="item_title"><span class="label">내 주소로 부터 거리</span></div>
+                                <div class="item_pt center">
+                                    
+                                    <a class="target checker" href="#" id="lbl_20" onclick="fn_dstnChk('20')"><span class="sprity-search sprity-search-icon_km">20Km</span></a>
+                                    <input class="hide" type="checkbox" id="20" name="dstncVal" value="20">
+                                    
+                                    <a class="target checker" href="#" id="lbl_50" onclick="fn_dstnChk('50')"><span class="sprity-search sprity-search-icon_km">50Km</span></a>
+                                    <input class="hide" type="checkbox" id="50" name="dstncVal" value="50">
+                                    
+                                    <a class="target checker" href="#" id="lbl_100" onclick="fn_dstnChk('100')"><span class="sprity-search sprity-search-icon_km">100Km</span></a>
+                                    <input class="hide" type="checkbox" id="100" name="dstncVal" value="100">
+                                    
+                                    <a class="target checker" href="#" id="lbl_200" onclick="fn_dstnChk('200')"><span class="sprity-search sprity-search-icon_km">200Km</span></a>
+                                    <input class="hide" type="checkbox" id="200" name="dstncVal" value="200">
+                                    
+                                </div>
+                            </div>
+ -->
+                        </div>
+                        <!-- 끝 : tab_body -->
+                    
+                        <div class="submit_bt">
+
+                            <a href="https://www.foresttrip.go.kr" class="defBtn board" onclick="fn_goSrch();">검색</a>
+                        </div>
+
+                    </div>
+                    <!-- 끝 : category_tab -->
+
+                </div>
+
+                <div class="my_search_layer">
+                    
+                    <div class="layer_title">
+
+                        원하시는 조건으로 검색결과 내 검색을 해 보세요.
+                    </div>
+
+                    <div class="layer_itme">
+                        
+                        인원수 
+                    </div>
+
+                </div>
+
+                <div class="radio">
+                    <label class="checked" for="myViewFclt">
+                        <input id="myViewFclt" class="ckview" type="checkbox" name="myViewFclt" value="Y" onclick="fn_myView();return false;" > 내가본시설
+                    </label>
+                    <label for="intrdFclt">
+                        <input id="intrdFclt" class="ckview" type="checkbox" name="intrdFclt" value="Y"  onclick="fn_intrd();return false;" > 관심 시설
+                    </label>
+                </div>
+
+            </div>
+        
+        <div class="multi_category_right">
+	        <div class="cate_sort">
+	            <a href="#ALL" onClick="fn_selSort('ALL');return false;" class="ov" style="display: none;">전체</a>
+	            <!-- <a href="#">빅데이터 추천</a> -->
+	            <a href="#ADMIN" onClick="fn_selRecom('ADMIN');return false;"  style="display: none;">운영자추천</a>
+	            <a href="#MY" onClick="fn_selSort('MY');return false;" >내 주소중심</a>
+	            <a href="#JA" onClick="fn_selSort('JA');return false;" >가나다순</a>
+	        </div>
+	        
+	        <div class="cate_select">
+	            <select title="운영기관 유형" id="insttTpcd" name="insttTpcd" onChange="fn_goSrch();return false;">
+	                <option value="">운영기관 유형</option>
+	                <option value="01" >국립</option>
+	                <option value="02" >공립</option>
+	                <option value="04" >사립</option>
+	            </select>
+	        </div>
+	    </div>
+        
+    </div>
+
+
+    <div class="multi_search_body layout" >
+
+        <div class="search_map api_map" id="mapApi" style="height:100%;min-height:695px;">
+        </div>
+
+        <div class="search_content" style="min-height:695px;">
+
+            <div class="content_item">
+
+                <div class="item_title">
+
+                    <strong>시설정보</strong>
+                    <span>1/47 총 <span>185</span>곳</span>
+                </div>
+
+                <div class="item_pt">
+                    
+                    
+                    
+                    <div class="pt_bodo mapListTr" id="tr_1" >
+
+                        <div class="bodo_thumb">
+                            <!-- <div class="flag">
+                                <a href="#">추천 <span class="plus">+</span><span class="minus">-</span></a>
+                                <ul>
+                                    <li><a href="#">생애주기추천</a></li>
+                                    <li><a href="#">이용패턴추천</a></li>
+                                    <li><a href="#">거리/지역추천</a></li>
+                                    <li><a href="#">인기시설추천</a></li>
+                                    <li><a href="#">자주이용시설</a></li>
+                                    <li><a href="#">최근이용시설</a></li>
+                                </ul>
+                            </div> -->
+                            <img src="https://image.foresttrip.go.kr/ino/instt/b770807e-c0cb-459d-a5af-b61bcb031316.jpg" alt="가리산 자연휴양림" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+                            
+                        </div>
+
+                        <div class="bodo_pt">
+    
+                            <div class="title"> 
+                                <a href="#ID02030002">
+                                    
+                                    
+                                    <span class="mr_reg mr_reg_2">공</span> 
+                                    
+                                    
+                                    <b>가리산 자연휴양림</b>
+                                </a> 
+
+                                
+                                <div class="schedule_info">
+                                    <a href="https://www.foresttrip.go.kr" onclick="return false;">예약 접수중 <span class="t_arr"></span></a>
+                                    <div class="info_layer">
+                                        <!-- <div class="layer_head">예약 접수 중</div> -->
+                                        <div class="layer_body">
+                                            <ul>
+                                                
+                                                <li>
+                                                    <span>선착순 예약 접수 중</span>
+                                                    <a href="https://www.foresttrip.go.kr" class="reserveA" onclick="fn_goRsvrtTheme('2','ID02030002','가리산 자연휴양림', 'fcfsRsrvt', 'theme_ID02030002'); return false;">예약</a>
+                                                </li>
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="pt">
+                                
+                                
+                                
+                                
+                                 자연과 잘 어우러진 숙박 시설은 실내 및 실외를 나무 내음과 숲의 자연 내음이 잘 어우러진 지역산 목재로 시공..
+                                
+                            </div>
+                            
+                            <a class="lnk_site" title="새창" href="https://garisan.foresttrip.go.kr" target="_blank"><img src="/images/content/stay_lnk_site.png" alt="홈페이지 바로가기">홈페이지 바로가기</a>
+                            
+                        </div>
+                        <div class="attack_tit">
+                            <p>
+                                
+                                <a href="/pot/cc/nm/selectNticBbrssDtlView.do?hmpgId=ID02030002&menuId=005001&twbbsId=244656&bbrssMsterId=BBRSSMSTER_00000051" target="_blank">
+                                    <span class="mr_reg" style="background-color:#8c8c8c; width:40px; padding-top:3px; border-radius:10px;-webkit-border-radius:10px;">공지</span> 가리산자연휴양림  동절기 소형산막(1번~9번) 및 야영장 운영중지
+                                </a>
+                                
+                            </p>
+                        </div>
+                        <!-- 
+                        <div class="bodo_tag">
+                            <a href="#">#태그</a>
+                            <a href="#">#태그</a>
+                            <a href="#">#태그</a>
+                        </div>
+                        -->
+                        
+                        <div class="bodo_button">
+                            <a class="heart_sel " href="#addIntrsRcrfr" onClick="fn_addRcrfr('ID02030002','가리산 자연휴양림', this); return false;">
+                                <div class="sprity-search sprity-search-icon_cont_heart"></div>관심
+                            </a>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="pt_bodo mapListTr" id="tr_2" >
+
+                        <div class="bodo_thumb">
+                            <!-- <div class="flag">
+                                <a href="#">추천 <span class="plus">+</span><span class="minus">-</span></a>
+                                <ul>
+                                    <li><a href="#">생애주기추천</a></li>
+                                    <li><a href="#">이용패턴추천</a></li>
+                                    <li><a href="#">거리/지역추천</a></li>
+                                    <li><a href="#">인기시설추천</a></li>
+                                    <li><a href="#">자주이용시설</a></li>
+                                    <li><a href="#">최근이용시설</a></li>
+                                </ul>
+                            </div> -->
+                            <img src="https://image.foresttrip.go.kr/ino/instt/8ef66722-24d6-4548-a2bf-8aa58b0b5bed.jpg" alt="가리왕산 자연휴양림" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+                            
+                        </div>
+
+                        <div class="bodo_pt">
+    
+                            <div class="title"> 
+                                <a href="#0113">
+                                    
+                                    <span class="mr_reg mr_reg_1">국</span> 
+                                    
+                                    
+                                    
+                                    <b>가리왕산 자연휴양림</b>
+                                </a> 
+
+                                
+                                <div class="schedule_info">
+                                    <a href="https://www.foresttrip.go.kr" onclick="return false;">예약 접수중 <span class="t_arr"></span></a>
+                                    <div class="info_layer">
+                                        <!-- <div class="layer_head">예약 접수 중</div> -->
+                                        <div class="layer_body">
+                                            <ul>
+                                                
+                                                <li>
+                                                    <span>선착순 예약 접수 중</span>
+                                                    <a href="https://www.foresttrip.go.kr" class="reserveA" onclick="fn_goRsvrtTheme('2','0113','가리왕산 자연휴양림', 'fcfsRsrvt', 'theme_0113'); return false;">예약</a>
+                                                </li>
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="pt">
+                                
+                                
+                                
+                                울창한 숲과 야생화 꽃밭이 어우러진 가리왕산 자연휴양림         
+                                
+                                
+                            </div>
+                            
+                            <a class="lnk_site" title="새창" href="http://www.foresttrip.go.kr/0113" target="_blank"><img src="/images/content/stay_lnk_site.png" alt="홈페이지 바로가기">홈페이지 바로가기</a>
+                            
+                        </div>
+                        <div class="attack_tit">
+                            <p>
+                                
+                                <a href="/pot/cc/nm/selectNticBbrssDtlView.do?hmpgId=0113&menuId=005001&twbbsId=261671&bbrssMsterId=BBRSSMSTER_00000051" target="_blank">
+                                    <span class="mr_reg" style="background-color:#8c8c8c; width:40px; padding-top:3px; border-radius:10px;-webkit-border-radius:10px;">공지</span> [공지] 국립자연휴양림 객실 기준인원 조정 안내
+                                </a>
+                                
+                            </p>
+                        </div>
+                        <!-- 
+                        <div class="bodo_tag">
+                            <a href="#">#태그</a>
+                            <a href="#">#태그</a>
+                            <a href="#">#태그</a>
+                        </div>
+                        -->
+                        
+                           <div class="bodo_tag">
+                                
+                                    <span>#도립공원</span>
+                                
+                                    <span>#휴식 </span>
+                                
+                                    <span>#가족여행 </span>
+                                
+                                    <span>#자연탐구 </span>
+                                
+                                    <span>#관광 </span>
+                                
+                                    <span>#등산 </span>
+                                
+                           </div>
+                       
+                        <div class="bodo_button">
+                            <a class="heart_sel " href="#addIntrsRcrfr" onClick="fn_addRcrfr('0113','가리왕산 자연휴양림', this); return false;">
+                                <div class="sprity-search sprity-search-icon_cont_heart"></div>관심
+                            </a>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="pt_bodo mapListTr" id="tr_3" >
+
+                        <div class="bodo_thumb">
+                            <!-- <div class="flag">
+                                <a href="#">추천 <span class="plus">+</span><span class="minus">-</span></a>
+                                <ul>
+                                    <li><a href="#">생애주기추천</a></li>
+                                    <li><a href="#">이용패턴추천</a></li>
+                                    <li><a href="#">거리/지역추천</a></li>
+                                    <li><a href="#">인기시설추천</a></li>
+                                    <li><a href="#">자주이용시설</a></li>
+                                    <li><a href="#">최근이용시설</a></li>
+                                </ul>
+                            </div> -->
+                            <img src="https://image.foresttrip.go.kr/ino/instt/6ad42a83-dce3-4f44-a439-7d8cf9a2262a.jpg" alt="갈모봉 자연휴양림" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+                            
+                        </div>
+
+                        <div class="bodo_pt">
+    
+                            <div class="title"> 
+                                <a href="#ID02030124">
+                                    
+                                    
+                                    <span class="mr_reg mr_reg_2">공</span> 
+                                    
+                                    
+                                    <b>갈모봉 자연휴양림</b>
+                                </a> 
+
+                                
+                                <div class="schedule_info">
+                                    <a href="https://www.foresttrip.go.kr" onclick="return false;">예약 접수중 <span class="t_arr"></span></a>
+                                    <div class="info_layer">
+                                        <!-- <div class="layer_head">예약 접수 중</div> -->
+                                        <div class="layer_body">
+                                            <ul>
+                                                
+                                                <li>
+                                                    <span>선착순 예약 접수 중</span>
+                                                    <a href="https://www.foresttrip.go.kr" class="reserveA" onclick="fn_goRsvrtTheme('8','ID02030124','갈모봉 자연휴양림', 'fcfsRsrvt', 'theme_ID02030124'); return false;">예약</a>
+                                                </li>
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="pt">
+                                
+                                
+                                
+                                
+                                고성갈모봉 자연휴양림은 우수한 산림자원 및 자연환경을 종합적으로 체험할 수 있는 공간을 조성하여 질 높은 산림복..
+                                
+                            </div>
+                            
+                            <a class="lnk_site" title="새창" href="https://www.foresttrip.go.kr/indvz/main.do?hmpgId=ID02030124" target="_blank"><img src="/images/content/stay_lnk_site.png" alt="홈페이지 바로가기">홈페이지 바로가기</a>
+                            
+                        </div>
+                        <div class="attack_tit">
+                            <p>
+                                
+                                <a href="/pot/cc/nm/selectNticBbrssDtlView.do?hmpgId=ID02030124&menuId=005001&twbbsId=257875&bbrssMsterId=BBRSSMSTER_00000051" target="_blank">
+                                    <span class="mr_reg" style="background-color:#8c8c8c; width:40px; padding-top:3px; border-radius:10px;-webkit-border-radius:10px;">공지</span> 고성갈모봉 자연휴양림 운영 프로그램 안내
+                                </a>
+                                
+                            </p>
+                        </div>
+                        <!-- 
+                        <div class="bodo_tag">
+                            <a href="#">#태그</a>
+                            <a href="#">#태그</a>
+                            <a href="#">#태그</a>
+                        </div>
+                        -->
+                        
+                           <div class="bodo_tag">
+                                
+                                    <span>#등산로 </span>
+                                
+                                    <span>#휴식 </span>
+                                
+                                    <span>#등산 </span>
+                                
+                                    <span>#자연탐구 </span>
+                                
+                                    <span>#나홀로여행 </span>
+                                
+                           </div>
+                       
+                        <div class="bodo_button">
+                            <a class="heart_sel " href="#addIntrsRcrfr" onClick="fn_addRcrfr('ID02030124','갈모봉 자연휴양림', this); return false;">
+                                <div class="sprity-search sprity-search-icon_cont_heart"></div>관심
+                            </a>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="pt_bodo mapListTr" id="tr_4" >
+
+                        <div class="bodo_thumb">
+                            <!-- <div class="flag">
+                                <a href="#">추천 <span class="plus">+</span><span class="minus">-</span></a>
+                                <ul>
+                                    <li><a href="#">생애주기추천</a></li>
+                                    <li><a href="#">이용패턴추천</a></li>
+                                    <li><a href="#">거리/지역추천</a></li>
+                                    <li><a href="#">인기시설추천</a></li>
+                                    <li><a href="#">자주이용시설</a></li>
+                                    <li><a href="#">최근이용시설</a></li>
+                                </ul>
+                            </div> -->
+                            <img src="https://image.foresttrip.go.kr/ino/instt/c139c94a-05d2-4474-9b29-4722d98d81f0.jpg" alt="강씨봉자연휴양림" onerror="this.src = '/images/common/no_img.gif'; this.alt = '표시할 이미지 없습니다';">
+                            
+                        </div>
+
+                        <div class="bodo_pt">
+    
+                            <div class="title"> 
+                                <a href="#ID02030019">
+                                    
+                                    
+                                    <span class="mr_reg mr_reg_2">공</span> 
+                                    
+                                    
+                                    <b>강씨봉자연휴양림</b>
+                                </a> 
+
+                                
+                                <div class="schedule_info">
+                                    <a href="https://www.foresttrip.go.kr" onclick="return false;">예약 접수중 <span class="t_arr"></span></a>
+                                    <div class="info_layer">
+                                        <!-- <div class="layer_head">예약 접수 중</div> -->
+                                        <div class="layer_body">
+                                            <ul>
+                                                
+                                                <li>
+                                                    <span>선착순 예약 접수 중</span>
+                                                    <a href="https://www.foresttrip.go.kr" class="reserveA" onclick="fn_goRsvrtTheme('1','ID02030019','강씨봉자연휴양림', 'fcfsRsrvt', 'theme_ID02030019'); return false;">예약</a>
+                                                </li>
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                <li>
+                                                    <span>월별 추첨 예약 접수 중</span>
+                                                    <a href="https://www.foresttrip.go.kr" class="reserveA" onclick="return false;">예약</a>
+                                                </li>
+                                                
+                                                
+                                                
+                                                <li>
+                                                    <span>바우처 우선 예약 접수 중</span>
+                                                    <a href="https://www.foresttrip.go.kr" class="reserveA" onclick="fn_goRsvrtTheme('1','ID02030019','강씨봉자연휴양림', 'vccpRsrvt', 'theme_ID02030019'); return false;">예약</a>
+                                                </li>
+                                                
+                                                
+                                                <li>
+                                                    <span>지역주민 우선 예약 접수 중</span>
+                                                    <a href="https://www.foresttrip.go.kr" class="reserveA" onclick="fn_goRsvrtTheme('1','ID02030019','강씨봉자연휴양림', 'areaRsrvt', 'theme_ID02030019'); return false;">예약</a>
+                                                </li>
+                                                
+                                                
+                                                
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="pt">
+                                
+                                
+                                
+                                
+                                강씨봉자연휴양림은 980㏊의 울창한 천연림의 아름다운 경관을 가진 가평군 북면 적목리에 위치하고 있습니다. 이 ..
+                                
+                            </div>
+                            
+                            <a class="lnk_site" title="새창" href="https://gangssibong.foresttrip.go.kr" target="_blank"><img src="/images/content/stay_lnk_site.png" alt="홈페이지 바로가기">홈페이지 바로가기</a>
+                            
+                        </div>
+                        <div class="attack_tit">
+                            <p>
+                                
+                                <a href="/pot/cc/nm/selectNticBbrssDtlView.do?hmpgId=ID02030019&menuId=005001&twbbsId=217383&bbrssMsterId=BBRSSMSTER_00000051" target="_blank">
+                                    <span class="mr_reg" style="background-color:#8c8c8c; width:40px; padding-top:3px; border-radius:10px;-webkit-border-radius:10px;">공지</span> 강씨봉자연휴양림 경기도 지역주민 우선예약제 객실 확대 운영안내
+                                </a>
+                                
+                            </p>
+                        </div>
+                        <!-- 
+                        <div class="bodo_tag">
+                            <a href="#">#태그</a>
+                            <a href="#">#태그</a>
+                            <a href="#">#태그</a>
+                        </div>
+                        -->
+                        
+                           <div class="bodo_tag">
+                                
+                                    <span>#등산로 </span>
+                                
+                                    <span>#개울 </span>
+                                
+                                    <span>#휴식 </span>
+                                
+                                    <span>#가족여행 </span>
+                                
+                                    <span>#연인여행 </span>
+                                
+                                    <span>#등산 </span>
+                                
+                           </div>
+                       
+                        <div class="bodo_button">
+                            <a class="heart_sel " href="#addIntrsRcrfr" onClick="fn_addRcrfr('ID02030019','강씨봉자연휴양림', this); return false;">
+                                <div class="sprity-search sprity-search-icon_cont_heart"></div>관심
+                            </a>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+
+                <!-- 목록 페이징 -->
+                <div class="page_list">
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <strong class="ds_number">1</strong>
+                        
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('2'); return false;">2</a>
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('3'); return false;">3</a>
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('4'); return false;">4</a>
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('5'); return false;">5</a>
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('6'); return false;">6</a>
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('7'); return false;">7</a>
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('8'); return false;">8</a>
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('9'); return false;">9</a>
+                    
+                        
+                        <a class="ds_number" href="#goPage" onClick="fn_goPage('10'); return false;">10</a>
+                    
+                    
+                    <span class="paging_count">(1/47)</span>
+                    
+                    
+                    <span class="mo_p_next">
+                        <a href="#goNextPage" onClick="fn_goPageMob('N'); return false;">
+                          <img src="/images/board/btn_next_bg.gif" alt="다음으로">
+                        </a>
+                    </span>
+                    
+                    
+                    
+                    <span class="p_next">
+                        <a href="#goNextPage" onClick="fn_goNextPage(); return false;">
+                          <img src="/images/board/btn_next_bg.gif" alt="다음으로">
+                        </a>
+                    </span>
+                    
+                    
+                    
+                    <span class="p_end">
+                        <a href="#goPageLast" onClick="fn_goPage('47'); return false;">
+                          <img src="/images/board/btn_end_bg.gif" alt="제일마지막으로">
+                        </a>
+                    </span>
+                    
+                </div>
+                        
+            </div>
+        
+        </div>
+        <!-- 끝 : search_content-->
+
+    </div>
+</form>
+</div>
+
+<script>
+/* 
+$( '.bodo_button .heart_sel' ).on('click', function(event) {
+    event.preventDefault();
+    $(this).toggleClass( 'ov' );
+});
+ */
+</script>
+
+    
+    
+
+
+    <div id="footer" >
+
+        <div class="f_top">
+            
+            <div class="layout">
+
+                <div class="f_link">
+                    
+                    <div class="fl_sitegroup">
+
+                        <a class="fs_ti" href="#">유관기관 사이트 <span class="ft_mroe"><img
+                                src="/portal/images/layout/fl_ti_more.png" alt="유관기관 사이트 더보기"></span></a>
+
+                        <div class="fs_list">
+                            <a title="새 창 열림" href="http://www.forest.go.kr/" target="_blank">산림청</a> 
+                            <a title="새 창 열림" href="https://nifos.forest.go.kr/" target="_blank">국립산림과학원</a> 
+                            <a title="새 창 열림" href="http://www.kna.go.kr" target="_blank">국립수목원</a> 
+                            <a title="새 창 열림" href="https://fhi.forest.go.kr/" target="_blank">산림교육원</a> 
+                            <a title="새 창 열림" href="https://nfsv.forest.go.kr" target="_blank">국립산림품종관리센터</a>
+                            <a title="새 창 열림" href="https://portal.fowi.or.kr/main/newMain.action" target="_blank">한국산림복지진흥원</a>
+                            <a title="새 창 열림" href="http://reservation.knps.or.kr/main.action" target="_blank">국립공원공단</a>
+                        </div>
+                    </div>
+
+                    <div class="fl_sitegroup">
+
+                            <a class="fs_ti" href="#">산림 행정정보 사이트 <span class="ft_mroe">
+                                <img src="/portal/images/layout/fl_ti_more.png" alt="산림 행정정보 사이트 더보기"></span>
+                            </a>
+
+                            <div class="fs_list">
+                                <a title="새 창 열림" href="http://www.nature.go.kr" target="_blank">국가생물종지식정보</a> 
+                                <a title="새 창 열림" href="http://www.nature.go.kr/kpni/" target="_blank">국가표준식물목록</a> 
+                                <a title="새 창 열림" href="http://ftis.forest.go.kr/" target="_blank">산림과학기술서비스</a> 
+                                <a title="새 창 열림" href="http://fgis.forest.go.kr" target="_blank">산림공간정보서비스</a> 
+                                <a title="새 창 열림" href="https://know.nifos.go.kr/know/info/main/knowMain.do" target="_blank">산림과학정보관</a> 
+                                <a title="새 창 열림" href="http://fec.forest.go.kr/" target="_blank">산림사업법인</a> 
+                                <!-- <a title="새 창 열림" href="http://aerophoto.kfri.go.kr/" target="_blank">산림항공사진검색시스템</a> --> 
+                                <a title="새 창 열림" href="http://forestfire.nifos.go.kr" target="_blank">산불위험예보시스템</a> 
+                                <a title="새 창 열림" href="https://sansatai.forest.go.kr/" target="_blank">산사태정보시스템</a>
+                                <a title="새 창 열림" href="http://www.forestland.go.kr" target="_blank">산지정보시스템</a> 
+                                <a title="새 창 열림" href="http://forestlove.forest.go.kr" target="_blank">숲사랑커뮤니티</a> 
+                                <!-- <a title="새 창 열림" href="http://www.foreston.go.kr" target="_blank">숲에ON</a>  -->
+                                <a title="새 창 열림" href="http://www.forestinfo.or.kr/" target="_blank">임산물유통정보</a>
+                                <!-- <a title="새 창 열림" href="http://www.huyang.go.kr/index.jsp" target="_blank">자연휴양림예약정보</a> -->
+                            </div>
+                        </div>
+                </div>
+
+                <script>
+
+                    (function () {
+
+                        var parent = $('.fl_sitegroup');
+                        var btn = parent.find('.fs_ti');
+
+                        btn.on('click', function (event) {
+
+                            event.preventDefault();
+
+                            var t = $(this);
+
+                            if (t.next().is(':visible')) {
+
+                                t.next().hide();
+                            }
+                            else {
+
+                                t.next().show();
+                            }
+                        });
+
+                        parent.on('mouseleave', function (event) {
+
+                            event.preventDefault();
+
+                            $(this).find('.fs_list').hide();
+                        });
+
+                    })();
+
+                </script>
+
+                <div class="f_returntop">
+
+                    <a id="screenReturnTop" href="#"><img src="/portal/images/layout/return_top.png" alt="화면 상단으로 이동"></a>
+                    <script>
+                        (function () {
+                            // 화면 상단 바로가기 버튼 id="screenReturnTop"
+
+                            var btn = $('#screenReturnTop');
+
+                            btn.on('click', function (event) {
+
+                                event.preventDefault();
+
+                                $('html, body').animate({ scrollTop: 0} , 300, 'easeOutExpo');
+
+                            });
+
+                            function movement () {
+
+                                if ($(window).width() <= 480) {
+
+                                    if ($(window).scrollTop() >= 1000) {
+
+                                        $('.f_returntop').stop(1, 0).fadeIn(300, 'easeOutExpo');
+                                    }
+                                    else {
+
+                                        $('.f_returntop').stop(1, 0).fadeOut(300, 'easeOutExpo');
+                                    }
+                                }
+
+                                return this;
+                            }
+
+
+                            $(window).on('scroll', function (event) {
+
+                                movement();
+                            });
+
+                            var rw = document.body.clientWidth, rtime = 0;
+
+                            $(window).resize(function () {
+
+                                if (rw != document.body.clientWidth) {
+
+                                    clearTimeout(rtime);
+
+                                    rtime = setTimeout(function () {
+
+                                        movement();
+
+                                        if ($(window).width() > 480) {
+
+                                            $('.f_returntop').show();
+                                        }
+
+                                    }, 100);
+
+                                    rw = document.body.clientWidth;
+                                }
+                            });
+
+                        })();
+                    </script>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="f_bottom">
+            
+            <div class="layout">
+                
+                <div class="f_txt">
+                	<p>숲나들e는 전국 자연휴양림의 예약을 지원하는 플랫폼입니다. 다만, 국립자연휴양림을 제외한 각 (공립/사립) 자연휴양림의 예약, 이용 및 환불등과 관련한 의무와 책임은 각 지자체나 개인에게 있습니다.</p>
+                </div>
+	                
+                <div class="f_cont_link">
+                    <a href="/pot/cc/sc/selectIninfCllctView.do?hmpgId=FRIP&menuId=006004002">숲나들e개인정보처리방침</a>
+                    <a href="/pot/cc/sc/selectSiteUsCndtnView.do?hmpgId=FRIP&menuId=006004001">산림휴양통합플랫폼이용약관</a>
+                    <a href="/pot/cc/sc/selectSnstiveInfoCllctView.do?hmpgId=FRIP&menuId=006004003">민감정보수집및이용동의</a>
+                    <!-- <a href="#">통합포털소개</a> -->
+                </div>
+
+                <address class="f_addr">
+
+                    <p class="fa_addr">
+                        (35403) 대전광역시 서구 복수북로 21 국립자연휴양림관리소
+
+                        <span>/</span>
+
+                        대표전화 : 1588-3250
+
+                        <span>/</span>
+
+                        팩스번호 : 042-580-5539
+
+                        <span>/</span>
+
+                        메일주소 : <a href="mailto:kfshuyang@korea.kr">kfshuyang@korea.kr</a>
+                    </p>
+                    <p class="fa_copy">Copyrightⓒ National Recreation Forest Management Office. All rights reserved.</p>
+                </address>
+
+                <div class="f_mark">
+                    <!-- 
+                    <a href="#"><img src="/portal/images/layout/f_bt_mark_1.png" alt="웹접근성 인증 마크"></a>
+                    <a href="#"><img src="/portal/images/layout/f_bt_mark_2.png" alt="이건 무슨마크지?"></a>
+                    <a href="#"><img src="/portal/images/layout/f_bt_mark_3.png" alt="개인정보보호우수사이트"></a>
+                    <a href="#"><img src="/portal/images/layout/f_bt_mark_4.png" alt="QR코드 http://example.com/"></a>
+                     -->
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    var sessionMenuId = "MBL" + "002001";
+    fn_treeView(sessionMenuId, '_csrf=3de23664-d661-430b-ad70-cec44cf9f1fd');
+    $('link[charset]').removeAttr("charset");
+</script>
+
+</body>
+</html>
