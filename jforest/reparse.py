@@ -60,6 +60,12 @@ def reparse(conn, step: str) -> int:
         for row in get_raw_pages(conn, "room_detail"):
             gid = row["ref_key"]
             d = parse_room_detail(row["body"])
+            # 라이브 크롤러와 동일하게 rooms의 인원/면적도 보강한다(capacity_standard는 상세에만 존재).
+            conn.execute(
+                "UPDATE rooms SET capacity_standard=?, capacity_max=COALESCE(?, capacity_max), "
+                "area=COALESCE(?, area) WHERE goods_id=?",
+                (d["capacity_standard"], d["capacity_max"], d["area"], gid),
+            )
             conn.execute("DELETE FROM room_prices WHERE goods_id=?", (gid,))
             for p in d["prices"]:
                 conn.execute(
