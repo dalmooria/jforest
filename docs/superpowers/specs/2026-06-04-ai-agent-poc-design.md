@@ -339,8 +339,21 @@ PoC에서 질의응답 품질이 충분하면 다음 단계로 확장한다.
 - Change: `ai_docs.build_embedding_documents` prepends `휴양림: <name> (<region>)` (region derived from `arcd` legal-district prefix via `region_from_arcd`) to field-dump doc types only (`ENRICHED_DOC_TYPES = discount, reservation_policy, room_usage`).
 - Why field-dump-only: a first version that enriched ALL doc types regressed answer quality (faithfulness 0.992 → 0.979) because a forest's name on its notices/rooms flooded forest-specific topic queries with that forest's unrelated docs. The `agent eval` harness caught this; scoping enrichment to field dumps removed the regression.
 - A/B on the 12-question adversarial set (gpt-4.1-mini judge): baseline faithfulness 0.992 / relevance 1.000 → refined enrichment 1.000 / 1.000, no per-question regressions. Retrieval-level: "대야산 바베큐" rose to rank 1; "경기도 지역주민 할인" returned 4 경기도 forests in top-8.
-- Caveat: answer-eval saturates near 1.0, so it under-measures retrieval-only gains/losses; a forest-specific retrieval golden set (recall/mrr) is the better metric for this change and is a recommended next step.
+- Caveat: answer-eval saturates near 1.0, so it under-measures retrieval-only gains/losses; a forest-specific retrieval golden set (recall/mrr) is the better metric for this change.
 - Indexes are A/B-separated by `--qdrant-root` (`data/qdrant` baseline vs `data/qdrant-enriched`); promoting enrichment to the live index requires re-indexing `data/qdrant`.
+
+### Forest-specific retrieval golden set (`tests/fixtures/bench/retrieval-forest-cases.jsonl`)
+
+- 11 questions (forest-specific discount ×5, forest-specific bbq ×3, region-filter ×3) whose `expected` docs are derived directly from the DB (exact discount ids / room goods_ids / region-matched rows), then scored with the existing `bench` recall/mrr harness.
+- This is the metric the answer-eval could not provide. Measured enrichment impact (openai-large, top-10):
+
+  | metric | baseline | enriched | Δ |
+  | --- | ---: | ---: | ---: |
+  | recall@5 | 0.091 | 0.636 | +0.545 |
+  | recall@10 | 0.091 | 0.818 | +0.727 |
+  | mrr@10 | 0.045 | 0.619 | +0.574 |
+
+- 9/11 improved, 0 regressed. The 2 remaining misses are forest-specific bbq queries where a forest has 30+ rooms and the "forest + amenity" signal dilutes across them (verified: enrichment did apply; the rooms are simply out-ranked). This multi-concept dilution is the motivating case for cross-encoder reranking.
 
 ## Known Limits
 
