@@ -43,3 +43,57 @@ def test_empty_evidence_is_explicit():
 
     assert evidence == "검색된 근거가 없습니다."
     assert "검색된 근거가 없습니다." in messages[1]["content"]
+
+
+from jforest.embeddings import EmbeddingCandidate
+from jforest.rag import answer_question
+
+
+class FakeEmbedder:
+    candidate = EmbeddingCandidate("fake", 3, "test", "fake-model")
+
+    def embed_texts(self, texts):
+        assert texts == ["바베큐 하기 좋은 곳"]
+        return [[0.1, 0.2, 0.3]]
+
+
+class FakeIndex:
+    def search(self, vector, limit):
+        assert vector == [0.1, 0.2, 0.3]
+        assert limit == 8
+        return [
+            {
+                "doc_id": "room_usage:R1",
+                "source_table": "room_usage_texts",
+                "source_pk": "R1",
+                "doc_type": "room_usage",
+                "title_or_name": "숲속의집",
+                "text": "바베큐 시설 이용 가능",
+                "score": 0.88,
+                "instt_id": "F001",
+                "goods_id": "R1",
+            }
+        ]
+
+
+class FakeGenerator:
+    model = "fake-chat"
+
+    def generate(self, messages):
+        assert "바베큐 하기 좋은 곳" in messages[1]["content"]
+        assert "바베큐 시설 이용 가능" in messages[1]["content"]
+        return "숲속의집은 바베큐 시설 이용 가능 근거가 있습니다. [1]"
+
+
+def test_answer_question_uses_retrieval_and_generation():
+    result = answer_question(
+        "바베큐 하기 좋은 곳",
+        embedder=FakeEmbedder(),
+        index=FakeIndex(),
+        generator=FakeGenerator(),
+    )
+
+    assert result.answer == "숲속의집은 바베큐 시설 이용 가능 근거가 있습니다. [1]"
+    assert result.candidate == "fake"
+    assert result.model == "fake-chat"
+    assert result.evidence[0].source_table == "room_usage_texts"

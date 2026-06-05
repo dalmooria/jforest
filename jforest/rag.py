@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol
+
+from jforest.embeddings import Embedder, get_embedder
+from jforest.vector_index import QdrantLocalIndex
 
 
 @dataclass(frozen=True)
@@ -23,6 +27,49 @@ class RagAnswer:
     evidence: list[RetrievedDocument]
     model: str
     candidate: str
+
+
+class VectorSearch(Protocol):
+    def search(self, vector: list[float], limit: int) -> list[dict]:
+        ...
+
+
+class AnswerGenerator(Protocol):
+    model: str
+
+    def generate(self, messages: list[dict[str, str]]) -> str:
+        ...
+
+
+class OpenAIAnswerGenerator:
+    def __init__(self, model: str = "gpt-4.1-mini"):
+        from openai import OpenAI
+
+        self.model = model
+        self.client = OpenAI(timeout=120.0)
+
+    def generate(self, messages: list[dict[str, str]]) -> str:
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=0.2,
+        )
+        content = response.choices[0].message.content
+        return content or ""
+
+
+def _doc_from_payload(payload: dict) -> RetrievedDocument:
+    return RetrievedDocument(
+        doc_id=str(payload.get("doc_id") or ""),
+        source_table=str(payload.get("source_table") or ""),
+        source_pk=str(payload.get("source_pk") or ""),
+        doc_type=str(payload.get("doc_type") or ""),
+        title_or_name=payload.get("title_or_name"),
+        text=str(payload.get("text") or ""),
+        score=float(payload.get("score") or 0.0),
+        instt_id=payload.get("instt_id"),
+        goods_id=payload.get("goods_id"),
+    )
 
 
 def format_evidence(docs: list[RetrievedDocument], max_chars_per_doc: int = 900) -> str:
@@ -53,3 +100,38 @@ def build_messages(question: str, evidence: str) -> list[dict[str, str]]:
         {"role": "system", "content": system},
         {"role": "user", "content": user},
     ]
+
+
+def answer_question(
+    question: str,
+    *,
+    candidate_name: str = "openai-large",
+    qdrant_root: str = "data/qdrant",
+    collection: str = "jforest",
+    limit: int = 8,
+    chat_model: str = "gpt-4.1-mini",
+    embedder: Embedder | None = None,
+    index: VectorSearch | None = None,
+    generator: AnswerGenerator | None = None,
+) -> RagAnswer:
+    embedder = embedder or get_embedder(candidate_name)
+    candidate = embedder.candidate
+    index = index or QdrantLocalIndex(
+        root=f"{qdrant_root}/{candidate.name}",
+        collection=collection,
+        dimension=candidate.dimension,
+    )
+    generator = generator or OpenAIAnswerGenerator(model=chat_model)
+
+    vector = embedder.embed_texts([question])[0]
+    payloads = index.search(vector, limit=limit)
+    docs = [_doc_from_payload(payload) for payload in payloads]
+    messages = build_messages(question, format_evidence(docs))
+    answer = generator.generate(messages)
+    return RagAnswer(
+        question=question,
+        answer=answer,
+        evidence=docs,
+        model=generator.model,
+        candidate=candidate.name,
+    )
