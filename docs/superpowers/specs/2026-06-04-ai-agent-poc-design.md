@@ -340,7 +340,7 @@ PoC에서 질의응답 품질이 충분하면 다음 단계로 확장한다.
 - Why field-dump-only: a first version that enriched ALL doc types regressed answer quality (faithfulness 0.992 → 0.979) because a forest's name on its notices/rooms flooded forest-specific topic queries with that forest's unrelated docs. The `agent eval` harness caught this; scoping enrichment to field dumps removed the regression.
 - A/B on the 12-question adversarial set (gpt-4.1-mini judge): baseline faithfulness 0.992 / relevance 1.000 → refined enrichment 1.000 / 1.000, no per-question regressions. Retrieval-level: "대야산 바베큐" rose to rank 1; "경기도 지역주민 할인" returned 4 경기도 forests in top-8.
 - Caveat: answer-eval saturates near 1.0, so it under-measures retrieval-only gains/losses; a forest-specific retrieval golden set (recall/mrr) is the better metric for this change.
-- Indexes are A/B-separated by `--qdrant-root` (`data/qdrant` baseline vs `data/qdrant-enriched`); promoting enrichment to the live index requires re-indexing `data/qdrant`.
+- Promotion: the enriched index has been promoted to the live default `data/qdrant` (verified: the default path now reports recall@10 0.818, and `agent ask "<forest> 할인"` answers that specific forest's discount). The previous baseline is kept at `data/qdrant/openai-large.baseline-bak` for rollback.
 
 ### Forest-specific retrieval golden set (`tests/fixtures/bench/retrieval-forest-cases.jsonl`)
 
