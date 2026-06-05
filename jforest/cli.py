@@ -199,14 +199,15 @@ def agent():
 @click.option("--qdrant-root", default="data/qdrant")
 @click.option("--model", "chat_model", default="gpt-4.1-mini")
 @click.option("--limit", "retrieval_limit", default=8, type=int)
+@click.option("--rerank", is_flag=True, help="cross-encoder 리랭킹(품질↑, 지연↑)")
 @click.option("--json", "as_json", is_flag=True)
 @click.pass_context
-def agent_ask(ctx, question, candidate, qdrant_root, chat_model, retrieval_limit, as_json):
+def agent_ask(ctx, question, candidate, qdrant_root, chat_model, retrieval_limit, rerank, as_json):
     """색인된 데이터 근거로 질문에 답한다."""
     import json
     from dataclasses import asdict
 
-    from jforest.rag import answer_question
+    from jforest.rag import BgeReranker, answer_question
 
     result = answer_question(
         question,
@@ -215,6 +216,7 @@ def agent_ask(ctx, question, candidate, qdrant_root, chat_model, retrieval_limit
         chat_model=chat_model,
         limit=retrieval_limit,
         db_path=ctx.obj["db"],
+        reranker=BgeReranker() if rerank else None,
     )
     if as_json:
         click.echo(json.dumps(asdict(result), ensure_ascii=False))
@@ -238,9 +240,10 @@ def agent_ask(ctx, question, candidate, qdrant_root, chat_model, retrieval_limit
 @click.option("--model", "chat_model", default="gpt-4.1-mini")
 @click.option("--judge-model", default="gpt-4.1-mini")
 @click.option("--limit", "retrieval_limit", default=8, type=int)
+@click.option("--rerank", is_flag=True, help="cross-encoder 리랭킹 적용 후 평가")
 @click.option("--output", "output_path", default="data/bench/runs/answer-eval.jsonl")
 @click.pass_context
-def agent_eval(ctx, cases_path, candidate, qdrant_root, chat_model, judge_model, retrieval_limit, output_path):
+def agent_eval(ctx, cases_path, candidate, qdrant_root, chat_model, judge_model, retrieval_limit, rerank, output_path):
     """RAG 답변 품질을 LLM-judge로 평가(faithfulness/answer_relevance)한다."""
     import json
     from dataclasses import asdict
@@ -252,6 +255,7 @@ def agent_eval(ctx, cases_path, candidate, qdrant_root, chat_model, judge_model,
         run_answer_eval,
         summarize_answer_eval,
     )
+    from jforest.rag import BgeReranker
 
     cases = load_eval_cases(cases_path)
     results = run_answer_eval(
@@ -262,6 +266,7 @@ def agent_eval(ctx, cases_path, candidate, qdrant_root, chat_model, judge_model,
         chat_model=chat_model,
         limit=retrieval_limit,
         db_path=ctx.obj["db"],
+        reranker=BgeReranker() if rerank else None,
     )
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:

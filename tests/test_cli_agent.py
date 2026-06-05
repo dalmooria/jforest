@@ -26,3 +26,11 @@ def test_agent_eval_command_exists(tmp_path):
 
     assert result.exit_code == 0
     assert "--cases" in result.output
+
+
+def test_agent_ask_has_rerank_flag(tmp_path):
+    runner = CliRunner()
+    result = runner.invoke(main, ["--db", str(tmp_path / "x.db"), "agent", "ask", "--help"])
+
+    assert result.exit_code == 0
+    assert "--rerank" in result.output

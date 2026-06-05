@@ -355,6 +355,20 @@ PoC에서 질의응답 품질이 충분하면 다음 단계로 확장한다.
 
 - 9/11 improved, 0 regressed. The 2 remaining misses are forest-specific bbq queries where a forest has 30+ rooms and the "forest + amenity" signal dilutes across them (verified: enrichment did apply; the rooms are simply out-ranked). This multi-concept dilution is the motivating case for cross-encoder reranking.
 
+## Cross-Encoder Reranking (opt-in)
+
+- `rag.BgeReranker` (`BAAI/bge-reranker-v2-m3`, injectable `Reranker` protocol) re-scores each `(query, doc.text)` pair after vector search. `answer_question` pulls `rerank_candidates` (default 50) then reranks to `limit`. Enabled via `agent ask --rerank` / `agent eval --rerank`.
+- Candidate-pool size is decisive: with pool=30 the reranker did NOT fix the two buried bbq cases (their docs ranked 42–43, outside the pool); with pool=50 it lifted them into the top-3 and promoted correct docs to rank 1 elsewhere.
+- Measured on the forest-specific retrieval golden set (enriched index, pool=50):
+
+  | metric | no rerank | + rerank | Δ |
+  | --- | ---: | ---: | ---: |
+  | recall@10 | 0.818 | 1.000 | +0.182 |
+  | mrr@10 | 0.619 | 0.894 | +0.275 |
+
+- Tradeoff: local CPU inference is ~2–5 s/query plus ~8 s model load per process, so it ships **opt-in** (default off). Production should use a persistent server (load once) or a GPU / hosted reranker (e.g. Cohere Rerank) for low latency.
+- Reranking only reorders the candidate pool; it cannot recover docs missing from it. Remaining recall gaps call for query expansion / HyDE or hybrid BM25, not more reranking.
+
 ## Known Limits
 
 - The benchmark question set currently has 9 questions, so quality conclusions are directional.

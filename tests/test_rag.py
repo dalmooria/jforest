@@ -136,3 +136,86 @@ def test_answer_question_enriches_forest_name():
     )
 
     assert result.evidence[0].instt_name == "테스트자연휴양림"
+
+
+class FakeReranker:
+    def __init__(self):
+        self.seen = None
+
+    def rerank(self, query, docs, top_k):
+        self.seen = (query, list(docs), top_k)
+        # reverse to prove reranking ran, then truncate
+        return list(reversed(docs))[:top_k]
+
+
+class FakeMultiIndex:
+    def __init__(self, n):
+        self.n = n
+        self.requested_limit = None
+
+    def search(self, vector, limit):
+        self.requested_limit = limit
+        return [
+            {
+                "doc_id": f"d{i}",
+                "source_table": "discount_policies",
+                "source_pk": str(i),
+                "doc_type": "discount",
+                "title_or_name": f"t{i}",
+                "text": f"text {i}",
+                "score": 0.9 - i * 0.01,
+            }
+            for i in range(limit)
+        ]
+
+
+def test_answer_question_reranks_candidates_to_limit():
+    index = FakeMultiIndex(n=30)
+    reranker = FakeReranker()
+
+    result = answer_question(
+        "질문",
+        embedder=FakeEmbedder2(),
+        index=index,
+        generator=FakeGenerator2(),
+        reranker=reranker,
+        limit=3,
+        rerank_candidates=12,
+    )
+
+    # retrieved the wider candidate pool, then reranked down to limit
+    assert index.requested_limit == 12
+    assert reranker.seen[2] == 3
+    assert len(result.evidence) == 3
+    # FakeReranker reversed, so the last candidate (pk "11") is now first
+    assert result.evidence[0].source_pk == "11"
+
+
+def test_answer_question_without_reranker_uses_plain_limit():
+    index = FakeMultiIndex(n=8)
+
+    result = answer_question(
+        "질문",
+        embedder=FakeEmbedder2(),
+        index=index,
+        generator=FakeGenerator2(),
+        limit=8,
+    )
+
+    assert index.requested_limit == 8
+    assert len(result.evidence) == 8
+    assert result.evidence[0].source_pk == "0"
+
+
+class FakeEmbedder2:
+    candidate = EmbeddingCandidate("fake", 3, "test", "fake-model")
+
+    def embed_texts(self, texts):
+        return [[0.1, 0.2, 0.3]]
+
+
+class FakeGenerator2:
+    model = "fake-chat"
+
+    def generate(self, messages):
+        return "답변"

@@ -44,6 +44,34 @@ class AnswerGenerator(Protocol):
         ...
 
 
+class Reranker(Protocol):
+    def rerank(
+        self, query: str, docs: list["RetrievedDocument"], top_k: int
+    ) -> list["RetrievedDocument"]:
+        ...
+
+
+class BgeReranker:
+    """Cross-encoder reranker. Scores each (query, doc.text) pair jointly, which
+    resolves the multi-concept dilution that bi-encoder vector search misses
+    (e.g. '<forest> 바베큐' where a forest has many rooms)."""
+
+    def __init__(self, model: str = "BAAI/bge-reranker-v2-m3"):
+        from sentence_transformers import CrossEncoder
+
+        self.model_name = model
+        self.model = CrossEncoder(model)
+
+    def rerank(
+        self, query: str, docs: list["RetrievedDocument"], top_k: int
+    ) -> list["RetrievedDocument"]:
+        if not docs:
+            return []
+        scores = self.model.predict([(query, doc.text) for doc in docs])
+        ranked = sorted(zip(docs, scores), key=lambda pair: pair[1], reverse=True)
+        return [replace(doc, score=float(score)) for doc, score in ranked[:top_k]]
+
+
 class NameResolver(Protocol):
     def resolve(self, instt_ids: list[str]) -> dict[str, str]:
         ...
@@ -141,10 +169,12 @@ def answer_question(
     limit: int = 8,
     chat_model: str = "gpt-4.1-mini",
     db_path: str = "data/jforest.db",
+    rerank_candidates: int = 50,
     embedder: Embedder | None = None,
     index: VectorSearch | None = None,
     generator: AnswerGenerator | None = None,
     name_resolver: NameResolver | None = None,
+    reranker: Reranker | None = None,
 ) -> RagAnswer:
     embedder = embedder or get_embedder(candidate_name)
     candidate = embedder.candidate
@@ -156,9 +186,14 @@ def answer_question(
     generator = generator or OpenAIAnswerGenerator(model=chat_model)
     name_resolver = name_resolver or SqliteForestNames(db_path)
 
+    # With a reranker, pull a wider candidate pool then let the cross-encoder
+    # pick the final `limit`; without one, search returns `limit` directly.
+    search_limit = max(limit, rerank_candidates) if reranker else limit
     vector = embedder.embed_texts([question])[0]
-    payloads = index.search(vector, limit=limit)
+    payloads = index.search(vector, limit=search_limit)
     docs = [_doc_from_payload(payload) for payload in payloads]
+    if reranker:
+        docs = reranker.rerank(question, docs, limit)
     instt_ids = sorted({doc.instt_id for doc in docs if doc.instt_id})
     names = name_resolver.resolve(instt_ids) if instt_ids else {}
     docs = [replace(doc, instt_name=names.get(doc.instt_id)) for doc in docs]
