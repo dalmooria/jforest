@@ -325,6 +325,14 @@ PoC에서 질의응답 품질이 충분하면 다음 단계로 확장한다.
 - Answer rule: the assistant must answer only from retrieved evidence and explicitly say when evidence is insufficient.
 - Forest name rehydration: retrieved payloads carry only an opaque `instt_id`, so `agent ask` joins `instt_id -> forests.name` from SQLite (`--db`) and adds the휴양림 name to each evidence line. This lets discount/policy answers name the actual forest instead of only the discount terms.
 
+## Answer Quality Evaluation
+
+- Retrieval eval (existing): `jforest bench` reports recall@k / mrr@k against `tests/fixtures/bench/questions.jsonl`.
+- Generation eval (new): `jforest/answer_eval.py` scores each answer with an injectable LLM-judge (`OpenAIJudge`, temperature 0) on **faithfulness** (claims supported by evidence / anti-hallucination) and **answer_relevance** (does it answer the question). Run via `uv run jforest --db data/jforest.db agent eval [--cases <jsonl>]`.
+- Golden sets: `questions.jsonl` (9, easy/answerable) and `answer-eval-cases.jsonl` (12, adversarial: specific-forest, region-filter, unanswerable, reasoning).
+- Baseline (gpt-4.1-mini, openai-large, top-8): easy set faithfulness 1.000 / relevance 0.978; adversarial set faithfulness 0.983 / relevance 0.975. Lowest scores fall on specific-forest and region-filter questions, matching the diagnosed retrieval gaps.
+- Known eval gaps: `insufficient` is currently derived from empty evidence, but retrieval always returns k docs, so unanswerable questions are handled in answer prose (judged via faithfulness) rather than flagged. A text-based "declined correctly" metric is a future addition.
+
 ## Known Limits
 
 - The benchmark question set currently has 9 questions, so quality conclusions are directional.

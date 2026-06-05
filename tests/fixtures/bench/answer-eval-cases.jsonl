@@ -1,0 +1,12 @@
+{"id":"specific_forest_discount","question":"산삼자연휴양림 장애인 할인 얼마야?","category":"specific_forest","note":"특정 휴양림 지목 — 임베딩측 이름 누락(병목#1) 노출"}
+{"id":"specific_forest_facility","question":"대야산자연휴양림에 바베큐 시설 있어?","category":"specific_forest","note":"특정 휴양림 시설 — 정확 휴양림 검색 필요"}
+{"id":"region_filter_discount","question":"경기도에 있는 휴양림 중 지역주민 할인 되는 곳 알려줘","category":"region_filter","note":"지역 필터 — 메타데이터 필터 부재(병목#4) 노출"}
+{"id":"region_recommend","question":"강원도 단풍 예쁜 휴양림 추천해줘","category":"region_filter","note":"지역+감성 추천"}
+{"id":"unanswerable_pet","question":"수영장에서 반려견과 같이 입수할 수 있는 휴양림 있어?","category":"unanswerable","note":"코퍼스에 없을 법한 조건 — 환각 저항 테스트"}
+{"id":"unanswerable_price","question":"1박에 정확히 35000원인 객실 목록 보여줘","category":"unanswerable","note":"정확 가격 — 데이터 없으면 충분치않음 답해야"}
+{"id":"unanswerable_future","question":"2027년 여름 성수기 예약 오픈일 언제야?","category":"unanswerable","note":"미래/없는 정보 — 추측 금지"}
+{"id":"compare_two","question":"장애인 할인율이 가장 높은 휴양림 한 곳만 콕 집어줘","category":"reasoning","note":"비교/단일선택 — 나열이 아닌 추론 요구"}
+{"id":"multi_condition","question":"다자녀이면서 지역주민이면 할인 중복으로 받을 수 있어?","category":"reasoning","note":"중복 적용 규칙 — 근거에 없으면 단정 금지"}
+{"id":"facility_specific","question":"개별 바베큐가 가능한 객실과 공용 바베큐장만 있는 곳 구분해서 알려줘","category":"facility","note":"세부 구분 요구"}
+{"id":"notice_recency","question":"이번 달 휴장하는 휴양림 있으면 알려줘","category":"notice","note":"최신성/시점 해석"}
+{"id":"reservation_method","question":"추첨제로 예약하는 휴양림은 어디야?","category":"reservation","note":"예약정책 검색"}

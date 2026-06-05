@@ -231,6 +231,52 @@ def agent_ask(ctx, question, candidate, qdrant_root, chat_model, retrieval_limit
         )
 
 
+@agent.command("eval")
+@click.option("--cases", "cases_path", default="tests/fixtures/bench/questions.jsonl")
+@click.option("--candidate", default="openai-large", type=click.Choice(sorted(CANDIDATES)))
+@click.option("--qdrant-root", default="data/qdrant")
+@click.option("--model", "chat_model", default="gpt-4.1-mini")
+@click.option("--judge-model", default="gpt-4.1-mini")
+@click.option("--limit", "retrieval_limit", default=8, type=int)
+@click.option("--output", "output_path", default="data/bench/runs/answer-eval.jsonl")
+@click.pass_context
+def agent_eval(ctx, cases_path, candidate, qdrant_root, chat_model, judge_model, retrieval_limit, output_path):
+    """RAG 답변 품질을 LLM-judge로 평가(faithfulness/answer_relevance)한다."""
+    import json
+    from dataclasses import asdict
+    from pathlib import Path
+
+    from jforest.answer_eval import (
+        OpenAIJudge,
+        load_eval_cases,
+        run_answer_eval,
+        summarize_answer_eval,
+    )
+
+    cases = load_eval_cases(cases_path)
+    results = run_answer_eval(
+        cases,
+        judge=OpenAIJudge(model=judge_model),
+        candidate_name=candidate,
+        qdrant_root=qdrant_root,
+        chat_model=chat_model,
+        limit=retrieval_limit,
+        db_path=ctx.obj["db"],
+    )
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        for result in results:
+            f.write(json.dumps(asdict(result), ensure_ascii=False) + "\n")
+    summary = summarize_answer_eval(results)
+    click.echo(
+        f"답변 평가: n={summary['count']} "
+        f"faithfulness={summary['faithfulness']:.3f} "
+        f"answer_relevance={summary['answer_relevance']:.3f} "
+        f"insufficient_rate={summary['insufficient_rate']:.3f}"
+    )
+    click.echo(f"상세 → {output_path}")
+
+
 @agent.command("serve")
 @click.option("--host", default="127.0.0.1")
 @click.option("--port", default=8000, type=int)

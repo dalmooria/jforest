@@ -18,3 +18,11 @@ def test_agent_serve_command_exists(tmp_path):
     assert result.exit_code == 0
     assert "--host" in result.output
     assert "--port" in result.output
+
+
+def test_agent_eval_command_exists(tmp_path):
+    runner = CliRunner()
+    result = runner.invoke(main, ["--db", str(tmp_path / "x.db"), "agent", "eval", "--help"])
+
+    assert result.exit_code == 0
+    assert "--cases" in result.output
