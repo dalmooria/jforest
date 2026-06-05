@@ -97,3 +97,42 @@ def test_answer_question_uses_retrieval_and_generation():
     assert result.candidate == "fake"
     assert result.model == "fake-chat"
     assert result.evidence[0].source_table == "room_usage_texts"
+
+
+def test_format_evidence_shows_forest_name_when_present():
+    docs = [
+        RetrievedDocument(
+            doc_id="discount:679",
+            source_table="discount_policies",
+            source_pk="679",
+            doc_type="discount",
+            title_or_name="장애인(등급 : 1급 ~ 6급)",
+            text="평일 30% 할인",
+            score=0.673,
+            instt_id="ID02030048",
+            instt_name="산삼자연휴양림",
+        )
+    ]
+
+    evidence = format_evidence(docs)
+
+    assert "산삼자연휴양림" in evidence
+    assert "discount_policies:679" in evidence
+
+
+class FakeNameResolver:
+    def resolve(self, instt_ids):
+        assert instt_ids == ["F001"]
+        return {"F001": "테스트자연휴양림"}
+
+
+def test_answer_question_enriches_forest_name():
+    result = answer_question(
+        "바베큐 하기 좋은 곳",
+        embedder=FakeEmbedder(),
+        index=FakeIndex(),
+        generator=FakeGenerator(),
+        name_resolver=FakeNameResolver(),
+    )
+
+    assert result.evidence[0].instt_name == "테스트자연휴양림"

@@ -36,7 +36,7 @@ def main(ctx, db, limit, force, delay):
     os.makedirs(os.path.dirname(db) or ".", exist_ok=True)
     conn = get_conn(db)
     init_db(conn)
-    ctx.obj = {"conn": conn, "limit": limit, "force": force, "delay": delay}
+    ctx.obj = {"conn": conn, "db": db, "limit": limit, "force": force, "delay": delay}
 
 
 @main.command()
@@ -200,7 +200,8 @@ def agent():
 @click.option("--model", "chat_model", default="gpt-4.1-mini")
 @click.option("--limit", "retrieval_limit", default=8, type=int)
 @click.option("--json", "as_json", is_flag=True)
-def agent_ask(question, candidate, qdrant_root, chat_model, retrieval_limit, as_json):
+@click.pass_context
+def agent_ask(ctx, question, candidate, qdrant_root, chat_model, retrieval_limit, as_json):
     """색인된 데이터 근거로 질문에 답한다."""
     import json
     from dataclasses import asdict
@@ -213,6 +214,7 @@ def agent_ask(question, candidate, qdrant_root, chat_model, retrieval_limit, as_
         qdrant_root=qdrant_root,
         chat_model=chat_model,
         limit=retrieval_limit,
+        db_path=ctx.obj["db"],
     )
     if as_json:
         click.echo(json.dumps(asdict(result), ensure_ascii=False))
@@ -222,9 +224,10 @@ def agent_ask(question, candidate, qdrant_root, chat_model, retrieval_limit, as_
     click.echo("")
     click.echo("근거:")
     for index, doc in enumerate(result.evidence, start=1):
+        forest = f"{doc.instt_name} · " if doc.instt_name else ""
         click.echo(
             f"[{index}] {doc.source_table}:{doc.source_pk} "
-            f"{doc.title_or_name or doc.doc_type} score={doc.score:.3f}"
+            f"{forest}{doc.title_or_name or doc.doc_type} score={doc.score:.3f}"
         )
 
 

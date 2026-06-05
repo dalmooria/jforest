@@ -319,10 +319,10 @@ PoC에서 질의응답 품질이 충분하면 다음 단계로 확장한다.
 - Default retriever: Qdrant Local collection at `data/qdrant/openai-large/jforest`.
 - Default embedding model: `text-embedding-3-large`.
 - Default chat model: `gpt-4.1-mini`.
-- Query flow: user question -> OpenAI embedding -> Qdrant top-k search -> evidence-bound prompt -> OpenAI answer.
+- Query flow: user question -> OpenAI embedding -> Qdrant top-k search -> `forests` name rehydration -> evidence-bound prompt -> OpenAI answer.
 - Current UI: CLI via `uv run jforest --db data/jforest.db agent ask "<question>"`.
 - Answer rule: the assistant must answer only from retrieved evidence and explicitly say when evidence is insufficient.
-- `agent ask` accepts `--db` because it shares the existing Click root command, but the current answer path reads Qdrant payload text only.
+- Forest name rehydration: retrieved payloads carry only an opaque `instt_id`, so `agent ask` joins `instt_id -> forests.name` from SQLite (`--db`) and adds the휴양림 name to each evidence line. This lets discount/policy answers name the actual forest instead of only the discount terms.
 
 ## Known Limits
 

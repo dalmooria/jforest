@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+import os
+import sqlite3
+from dataclasses import dataclass, replace
 from typing import Protocol
 
 from jforest.embeddings import Embedder, get_embedder
@@ -18,6 +20,7 @@ class RetrievedDocument:
     score: float
     instt_id: str | None = None
     goods_id: str | None = None
+    instt_name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -39,6 +42,32 @@ class AnswerGenerator(Protocol):
 
     def generate(self, messages: list[dict[str, str]]) -> str:
         ...
+
+
+class NameResolver(Protocol):
+    def resolve(self, instt_ids: list[str]) -> dict[str, str]:
+        ...
+
+
+class SqliteForestNames:
+    def __init__(self, db_path: str = "data/jforest.db"):
+        self.db_path = db_path
+
+    def resolve(self, instt_ids: list[str]) -> dict[str, str]:
+        if not instt_ids or not os.path.exists(self.db_path):
+            return {}
+        placeholders = ",".join("?" for _ in instt_ids)
+        conn = sqlite3.connect(self.db_path)
+        try:
+            rows = conn.execute(
+                f"SELECT instt_id, name FROM forests WHERE instt_id IN ({placeholders})",
+                instt_ids,
+            ).fetchall()
+        except sqlite3.OperationalError:
+            return {}
+        finally:
+            conn.close()
+        return {row[0]: row[1] for row in rows}
 
 
 class OpenAIAnswerGenerator:
@@ -80,8 +109,9 @@ def format_evidence(docs: list[RetrievedDocument], max_chars_per_doc: int = 900)
     for index, doc in enumerate(docs, start=1):
         title = doc.title_or_name or doc.doc_type
         text = doc.text.strip().replace("\r\n", "\n")[:max_chars_per_doc]
+        forest = f" 휴양림={doc.instt_name}" if doc.instt_name else ""
         lines.append(
-            f"[{index}] {doc.source_table}:{doc.source_pk} "
+            f"[{index}] {doc.source_table}:{doc.source_pk}{forest} "
             f"title={title} score={doc.score:.3f}\n{text}"
         )
     return "\n\n".join(lines)
@@ -110,9 +140,11 @@ def answer_question(
     collection: str = "jforest",
     limit: int = 8,
     chat_model: str = "gpt-4.1-mini",
+    db_path: str = "data/jforest.db",
     embedder: Embedder | None = None,
     index: VectorSearch | None = None,
     generator: AnswerGenerator | None = None,
+    name_resolver: NameResolver | None = None,
 ) -> RagAnswer:
     embedder = embedder or get_embedder(candidate_name)
     candidate = embedder.candidate
@@ -122,10 +154,14 @@ def answer_question(
         dimension=candidate.dimension,
     )
     generator = generator or OpenAIAnswerGenerator(model=chat_model)
+    name_resolver = name_resolver or SqliteForestNames(db_path)
 
     vector = embedder.embed_texts([question])[0]
     payloads = index.search(vector, limit=limit)
     docs = [_doc_from_payload(payload) for payload in payloads]
+    instt_ids = sorted({doc.instt_id for doc in docs if doc.instt_id})
+    names = name_resolver.resolve(instt_ids) if instt_ids else {}
+    docs = [replace(doc, instt_name=names.get(doc.instt_id)) for doc in docs]
     messages = build_messages(question, format_evidence(docs))
     answer = generator.generate(messages)
     return RagAnswer(
