@@ -231,6 +231,21 @@ def agent_ask(ctx, question, candidate, qdrant_root, chat_model, retrieval_limit
         )
 
 
+@agent.command("serve")
+@click.option("--host", default="127.0.0.1")
+@click.option("--port", default=8000, type=int)
+@click.pass_context
+def agent_serve(ctx, host, port):
+    """웹 채팅 UI + /ask API 서버를 띄운다."""
+    import uvicorn
+
+    from jforest.api import create_app
+
+    app = create_app(db_path=ctx.obj["db"])
+    click.echo(f"숲나들e 에이전트: http://{host}:{port}")
+    uvicorn.run(app, host=host, port=port)
+
+
 @main.command()
 @click.pass_context
 def status(ctx):

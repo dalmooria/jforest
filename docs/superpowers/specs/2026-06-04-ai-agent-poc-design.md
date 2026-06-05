@@ -320,7 +320,8 @@ PoC에서 질의응답 품질이 충분하면 다음 단계로 확장한다.
 - Default embedding model: `text-embedding-3-large`.
 - Default chat model: `gpt-4.1-mini`.
 - Query flow: user question -> OpenAI embedding -> Qdrant top-k search -> `forests` name rehydration -> evidence-bound prompt -> OpenAI answer.
-- Current UI: CLI via `uv run jforest --db data/jforest.db agent ask "<question>"`.
+- CLI: `uv run jforest --db data/jforest.db agent ask "<question>"`.
+- Web UI: `uv run jforest --db data/jforest.db agent serve` launches a FastAPI server (`jforest/api.py`) with a `POST /ask` JSON endpoint and a single-page HTML/JS chat at `GET /`. Request-response (no streaming yet); the chat page renders the answer plus an evidence list with휴양림 names.
 - Answer rule: the assistant must answer only from retrieved evidence and explicitly say when evidence is insufficient.
 - Forest name rehydration: retrieved payloads carry only an opaque `instt_id`, so `agent ask` joins `instt_id -> forests.name` from SQLite (`--db`) and adds the휴양림 name to each evidence line. This lets discount/policy answers name the actual forest instead of only the discount terms.
 

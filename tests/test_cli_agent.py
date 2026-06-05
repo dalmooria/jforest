@@ -9,3 +9,12 @@ def test_agent_group_exposes_ask_command(tmp_path):
 
     assert result.exit_code == 0
     assert "ask" in result.output
+
+
+def test_agent_serve_command_exists(tmp_path):
+    runner = CliRunner()
+    result = runner.invoke(main, ["--db", str(tmp_path / "x.db"), "agent", "serve", "--help"])
+
+    assert result.exit_code == 0
+    assert "--host" in result.output
+    assert "--port" in result.output
