@@ -115,6 +115,29 @@ def test_report_includes_facility_flags_when_available():
     assert "물놀이(O), 바베큐(X), 숲해설(O), 6주차 예약가능" in text
 
 
+def test_format_report_separates_monthly_highlight_from_weekly():
+    conn = _conn()
+    _add(conn, "0101", "수요일주간휴양림", "6주 수요일")
+    _add(conn, "0182", "칼봉산자연휴양림", "익월말",
+         "예약 신청은 매월 10일 객실 오후 4시부터, 다음달 말일까지 가능합니다.")
+    text = format_report(build_fcfs_report(conn, WED), WED)
+    # 월간 강조 섹션이 주간 섹션보다 앞에 온다
+    monthly_pos = text.index("오늘 지정 오픈 (월간)")
+    weekly_pos = text.index("매주 수요일 반복 오픈 (주간)")
+    assert monthly_pos < weekly_pos
+    assert "★ 오늘 지정 오픈 (월간) — 1곳" in text
+    assert "칼봉산자연휴양림" in text[monthly_pos:weekly_pos]  # 월간 섹션에 위치
+    assert "수요일주간휴양림" in text[weekly_pos:]  # 주간 섹션에 위치
+
+
+def test_format_report_no_monthly_today_shows_empty_highlight():
+    conn = _conn()
+    _add(conn, "0101", "수요일주간휴양림", "6주 수요일")
+    text = format_report(build_fcfs_report(conn, WED), WED)
+    assert "오늘이 지정 오픈일인 월간 휴양림 없음" in text
+    assert "매주 수요일 반복 오픈 (주간) — 1곳" in text
+
+
 def test_format_report_empty_day():
     conn = _conn()
     _add(conn, "0101", "강씨봉자연휴양림", "6주 수요일")

@@ -105,6 +105,7 @@ def build_fcfs_report(conn, on_date: date) -> list:
                 "instt_id": r["instt_id"],
                 "name": (r["name"] or "").strip(),
                 "method": (r["fcfs_method"] or "").strip(),
+                "kind": kind,  # "weekly"(매주 반복) | "monthly"(오늘 지정 오픈)
                 "week_label": week_label,
                 "water_play": r["water_play"],
                 "barbecue": r["barbecue"],
@@ -114,7 +115,16 @@ def build_fcfs_report(conn, on_date: date) -> list:
     return rows
 
 
+def _numbered(rows: list) -> list:
+    lines = []
+    for i, r in enumerate(rows, start=1):
+        lines.append(f"{i}. {r['name']}")
+        lines.append("   " + _facility_line(r))
+    return lines
+
+
 def format_report(rows: list, on_date: date) -> str:
+    """월간(오늘 지정 오픈)을 앞에 강조하고, 주간(매주 반복 오픈)을 뒤에 묶어 보여준다."""
     weekday = WEEKDAYS[on_date.weekday()]
     header = (
         f"{on_date.year}년 {on_date.month}월 {on_date.day}일 ({weekday}요일)\n"
@@ -123,10 +133,16 @@ def format_report(rows: list, on_date: date) -> str:
     if not rows:
         return header + "\n오늘 선착순 예약이 시작되는 휴양림이 없습니다.\n"
 
+    monthly = [r for r in rows if r["kind"] == "monthly"]
+    weekly = [r for r in rows if r["kind"] == "weekly"]
+
     lines = [header]
-    for i, r in enumerate(rows, start=1):
-        lines.append(f"{i}. {r['name']}")
-        lines.append("   " + _facility_line(r))
+    # 월간: '오늘이 지정 오픈일'인 곳 — 오늘만의 특별 오픈이라 앞에 강조
+    lines.append(f"\n★ 오늘 지정 오픈 (월간) — {len(monthly)}곳")
+    lines += _numbered(monthly) if monthly else ["  (오늘이 지정 오픈일인 월간 휴양림 없음)"]
+    # 주간: 매주 같은 요일 반복 오픈 — 참고용으로 뒤에
+    lines.append(f"\n· 매주 {weekday}요일 반복 오픈 (주간) — {len(weekly)}곳")
+    lines += _numbered(weekly) if weekly else ["  (해당 없음)"]
     return "\n".join(lines) + "\n"
 
 
