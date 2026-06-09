@@ -38,8 +38,10 @@ def _classify(method: str, detail: str):
         return "weekly", _WD_INDEX[m.group(2)], f"{m.group(1)}주차"
 
     if method == "익월말":
-        # "매월 1일 오픈 → 다음달 말일까지" (크롤된 본문 기준)
-        return "monthly", 1, "익월 말일까지"
+        # 월간 오픈일은 휴양림마다 다르다(1·5·7·10·11일 등) → 본문에서 파싱, 없으면 1일.
+        mon = _DETAIL_MONTHLY.search(detail)
+        day = int(mon.group(1)) if mon else 1
+        return "monthly", day, "익월 말일까지"
 
     if method == "상세정책":
         wd = _DETAIL_WEEKDAY.search(detail)

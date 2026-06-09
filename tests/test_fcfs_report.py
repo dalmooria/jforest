@@ -57,6 +57,22 @@ def test_weekly_and_monthly_do_not_leak_into_each_other():
     assert names_wed == {"수요일휴양림"}  # 수요일이지만 1일이 아니므로 월초그룹 제외
 
 
+def test_monthly_group_uses_actual_open_day_from_detail():
+    # '익월말' method도 본문의 '매월 N일'을 파싱해 그 날에만 열려야 한다(칼봉산=10일).
+    conn = _conn()
+    detail = "예약 신청은 매월 10일 전체 휴양림 객실 오후 4시부터, 다음달 말일까지 가능합니다."
+    _add(conn, "0182", "칼봉산자연휴양림", "익월말", detail)
+    assert [r["name"] for r in build_fcfs_report(conn, date(2026, 6, 10))] == ["칼봉산자연휴양림"]
+    assert build_fcfs_report(conn, date(2026, 6, 1)) == []  # 1일엔 안 열림
+
+
+def test_monthly_group_without_day_in_detail_defaults_to_first():
+    conn = _conn()
+    _add(conn, "0181", "기본월간휴양림", "익월말", "매월 오픈 안내(일자 미상)")
+    assert build_fcfs_report(conn, date(2026, 7, 1))
+    assert build_fcfs_report(conn, date(2026, 7, 10)) == []
+
+
 def test_detail_policy_parsed_from_fcfs_detail():
     conn = _conn()
     detail = "예약 신청은 매주 수요일 ... 오전 9시부터, 6주차 월요일까지 가능합니다."
