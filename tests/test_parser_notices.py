@@ -27,3 +27,11 @@ def test_parse_notice_detail_title_and_attachment():
     # 파일명도 같은 li의 span에서 추출
     att = next(a for a in d["attachments"] if a["file_id"] == "184669")
     assert att["file_name"] and att["file_name"].endswith(".pdf")
+
+def test_parse_notice_detail_extracts_real_content_text():
+    # 실제 공지 본문은 .board_view(메타) 밖의 white-space:pre-line div에 있다.
+    body = (FX / "notice_detail.html").read_text(encoding="utf-8")
+    d = parse_notice_detail(body)
+    assert d["content_text"] and "산불조심기간" in d["content_text"]
+    # content_text는 메타(작성자/조회수)가 아니라 실제 본문이어야 한다
+    assert "조회수" not in d["content_text"]

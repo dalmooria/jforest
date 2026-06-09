@@ -4,7 +4,7 @@ import click
 from jforest.db import get_conn, init_db
 from jforest.http import Client
 from jforest.reparse import reparse as do_reparse, status_counts
-from jforest.crawlers import forests, rooms, room_details, discounts, policies, notices
+from jforest.crawlers import forests, rooms, room_details, discounts, policies, notices, facilities
 from jforest.bench import index_candidate, run_candidate, snapshot_corpus, summarize_run, write_report
 from jforest.embeddings import CANDIDATES
 from jforest.extract import (
@@ -20,8 +20,9 @@ STEPS = {
     "discounts": discounts.run,
     "policies": policies.run,
     "notices": notices.run,
+    "facilities": facilities.run,
 }
-ORDER = ["forests", "rooms", "room-details", "discounts", "policies", "notices"]
+ORDER = ["forests", "rooms", "room-details", "discounts", "policies", "notices", "facilities"]
 REPARSE_STEPS = {"forests", "rooms", "room-details", "discounts", "policies", "notices"}
 
 
@@ -116,6 +117,29 @@ def structure(ctx, model):
 
     n = run_fact_extraction(o["conn"], generator=lazy_generator, model=model, limit=o["limit"])
     click.echo(f"structure: {n}건 처리")
+
+
+@main.command("facilities")
+@click.option("--model", default="gemini-2.5-flash", help="Vertex Gemini 모델")
+@click.pass_context
+def facilities_cmd(ctx, model):
+    """수집된 소개/프로그램 페이지에서 물놀이·바베큐·숲해설을 LLM으로 구조화한다."""
+    import threading
+    from jforest.facilities import run_facility_extraction
+    from jforest.structure import make_gemini_generator
+    o = ctx.obj
+    box = []
+    lock = threading.Lock()
+
+    def lazy_generator(prompt):
+        if not box:
+            with lock:
+                if not box:
+                    box.append(make_gemini_generator(model=model))
+        return box[0](prompt)
+
+    n = run_facility_extraction(o["conn"], generator=lazy_generator, model=model, limit=o["limit"])
+    click.echo(f"facilities: {n}건 처리")
 
 
 @main.group()
@@ -295,6 +319,20 @@ def agent_serve(ctx, host, port):
     app = create_app(db_path=ctx.obj["db"])
     click.echo(f"숲나들e 에이전트: http://{host}:{port}")
     uvicorn.run(app, host=host, port=port)
+
+
+@main.command("fcfs-report")
+@click.option("--date", "date_str", default=None, help="기준일 YYYY-MM-DD (기본: 오늘)")
+@click.pass_context
+def fcfs_report(ctx, date_str):
+    """해당일에 선착순 예약이 열리는 휴양림을 리포팅한다."""
+    from datetime import date as _date
+
+    from jforest.fcfs_report import build_fcfs_report, format_report
+
+    on_date = _date.fromisoformat(date_str) if date_str else _date.today()
+    rows = build_fcfs_report(ctx.obj["conn"], on_date)
+    click.echo(format_report(rows, on_date))
 
 
 @main.command()

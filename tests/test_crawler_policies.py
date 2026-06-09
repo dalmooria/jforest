@@ -24,6 +24,11 @@ def test_run_matches_and_fills_detail():
     assert conn.execute("SELECT COUNT(*) FROM raw_pages WHERE page_type='policy_all'").fetchone()[0] == 1
     row = conn.execute("SELECT fcfs_detail FROM reservation_policies WHERE instt_id='0113'").fetchone()
     assert row is not None and row["fcfs_detail"] and len(row["fcfs_detail"]) > 20
+    detail = conn.execute(
+        "SELECT title, detail_text FROM reservation_policy_details "
+        "WHERE instt_id='0113' AND rule_id='101'"
+    ).fetchone()
+    assert detail is not None and detail["title"] and detail["detail_text"]
     # 개별 정책 raw도 복합 ref_key로 저장
     pd = conn.execute("SELECT COUNT(*) FROM raw_pages WHERE page_type='policy_detail' AND ref_key LIKE '0113:%'").fetchone()[0]
     assert pd >= 1

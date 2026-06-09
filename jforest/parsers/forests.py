@@ -2,6 +2,13 @@
 import json
 import re
 
+# 운영주체 코드 → 라벨. 01=국립(예약시스템 G0…로 검증), 02=공립(지자체, 다수), 04=사립.
+INSTT_TYPE_LABELS = {"01": "국립", "02": "공립", "04": "사립"}
+
+
+def instt_type_label(code) -> str | None:
+    return INSTT_TYPE_LABELS.get(code)
+
 
 def parse_forest_list_json(text: str) -> list[dict]:
     data = json.loads(text)
@@ -16,11 +23,13 @@ def parse_forest_list_json(text: str) -> list[dict]:
         instt_id = item.get("insttId")
         if not instt_id:
             continue
+        code = item.get("insttTpcd")
         rows.append({
             "instt_id": instt_id,
             "name": item.get("insttNm"),
             "arcd": item.get("arcd"),
-            "instt_type_code": item.get("insttTpcd"),
+            "instt_type_code": code,
+            "instt_type": instt_type_label(code),
         })
     return rows
 

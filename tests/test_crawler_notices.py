@@ -33,6 +33,22 @@ def test_run_collects_notices_and_attachment_meta():
     fn = conn.execute("SELECT file_name FROM notice_attachments WHERE file_id='184669'").fetchone()
     assert fn and fn["file_name"] and fn["file_name"].endswith(".pdf")  # span에서 파일명 추출
 
+def test_run_stores_real_content_text():
+    list_body = (FX / "notice_list.html").read_text(encoding="utf-8")
+    detail_body = (FX / "notice_detail.html").read_text(encoding="utf-8")
+    def handler(request):
+        if "selectNticBbrssListView" in request.url.path:
+            return httpx.Response(200, text=list_body)
+        if "selectNticBbrssDtlView" in request.url.path:
+            return httpx.Response(200, text=detail_body)
+        return httpx.Response(404)
+    conn = sqlite3.connect(":memory:"); conn.row_factory = sqlite3.Row; init_db(conn)
+    conn.execute("INSERT INTO forests (instt_id, name, fetched_at) VALUES ('0113','가리왕산',?)", (now_iso(),)); conn.commit()
+    client = Client(conn, delay=0, transport=httpx.MockTransport(handler))
+    run(conn, client)
+    row = conn.execute("SELECT content_text FROM notices WHERE instt_id='0113' AND content_text IS NOT NULL LIMIT 1").fetchone()
+    assert row and row["content_text"] and "산불조심기간" in row["content_text"]
+
 def test_download_attachments_writes_file(tmp_path):
     def handler(request):
         return httpx.Response(200, content=b"%PDF-1.7 data",

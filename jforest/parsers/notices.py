@@ -43,6 +43,13 @@ def parse_notice_detail(text: str) -> dict:
     body_text = body_node.text(separator="\n", strip=True) if body_node else ""
     dm = _DATE.search(body_text)
     updated_at = dm.group(0) if dm else None
+    # 실제 본문은 .board_view(메타) 밖의 white-space:pre-line div에 있다.
+    content_text = ""
+    for d in tree.css("div"):
+        style = d.attributes.get("style") or ""
+        if "pre-line" in style:
+            content_text = d.text(separator="\n", strip=True)
+            break
     # 첨부: fn_goFileDown 앵커마다 같은 <li>의 <span>에서 파일명 추출
     attachments = []
     seen = set()
@@ -64,4 +71,5 @@ def parse_notice_detail(text: str) -> dict:
             if sp:
                 fname = sp.text(strip=True) or None
         attachments.append({"file_master_id": fm, "file_id": fid, "file_name": fname})
-    return {"title": title, "updated_at": updated_at, "body_text": body_text, "attachments": attachments}
+    return {"title": title, "updated_at": updated_at, "body_text": body_text,
+            "content_text": content_text, "attachments": attachments}

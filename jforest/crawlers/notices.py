@@ -63,13 +63,15 @@ def run(conn, client, *, limit=None, force=False) -> Summary:
             d = parse_notice_detail(dbody)
             ts = now_iso()
             conn.execute(
-                "INSERT OR REPLACE INTO notices (instt_id, twbbs_id, title, updated_at, body_text, fetched_at) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (iid, twbbs, d["title"] or it["title"], d["updated_at"] or it["updated_at"], d["body_text"], ts),
+                "INSERT OR REPLACE INTO notices (instt_id, twbbs_id, title, updated_at, body_text, content_text, fetched_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (iid, twbbs, d["title"] or it["title"], d["updated_at"] or it["updated_at"],
+                 d["body_text"], d["content_text"], ts),
             )
             for a in d["attachments"]:
+                # INSERT OR IGNORE: 이미 다운로드된 첨부의 downloaded/local_path/content_type를 보존한다.
                 conn.execute(
-                    "INSERT OR REPLACE INTO notice_attachments "
+                    "INSERT OR IGNORE INTO notice_attachments "
                     "(instt_id, twbbs_id, file_master_id, file_id, file_name, content_type, local_path, downloaded, fetched_at) "
                     "VALUES (?, ?, ?, ?, ?, NULL, NULL, 0, ?)",
                     (iid, twbbs, a["file_master_id"], a["file_id"], a.get("file_name"), ts),

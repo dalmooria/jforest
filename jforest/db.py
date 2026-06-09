@@ -76,12 +76,22 @@ CREATE TABLE IF NOT EXISTS reservation_policies (
   lottery_detail TEXT,
   fetched_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS reservation_policy_details (
+  instt_id TEXT NOT NULL,
+  rule_id TEXT NOT NULL,
+  menu_id TEXT,
+  title TEXT,
+  detail_text TEXT,
+  fetched_at TEXT NOT NULL,
+  PRIMARY KEY (instt_id, rule_id)
+);
 CREATE TABLE IF NOT EXISTS notices (
   instt_id TEXT NOT NULL,
   twbbs_id TEXT NOT NULL,
   title TEXT,
   updated_at TEXT,
   body_text TEXT,
+  content_text TEXT,
   fetched_at TEXT NOT NULL,
   PRIMARY KEY (instt_id, twbbs_id)
 );
@@ -95,8 +105,32 @@ CREATE TABLE IF NOT EXISTS notice_attachments (
   content_type TEXT,
   local_path TEXT,
   downloaded INTEGER DEFAULT 0,
+  extracted_text TEXT,
+  extraction_method TEXT,
   fetched_at TEXT NOT NULL,
   UNIQUE (file_master_id, file_id)
+);
+CREATE INDEX IF NOT EXISTS idx_natt_notice ON notice_attachments (instt_id, twbbs_id);
+CREATE TABLE IF NOT EXISTS notice_facts (
+  instt_id TEXT NOT NULL,
+  twbbs_id TEXT NOT NULL,
+  facts_json TEXT,
+  model TEXT,
+  needs_review INTEGER DEFAULT 0,
+  extracted_at TEXT NOT NULL,
+  PRIMARY KEY (instt_id, twbbs_id)
+);
+CREATE TABLE IF NOT EXISTS forest_facilities (
+  instt_id TEXT PRIMARY KEY,
+  water_play TEXT,
+  barbecue TEXT,
+  forest_guide TEXT,
+  water_play_evidence TEXT,
+  barbecue_evidence TEXT,
+  forest_guide_evidence TEXT,
+  model TEXT,
+  needs_review INTEGER DEFAULT 0,
+  extracted_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS fetch_log (
   id INTEGER PRIMARY KEY,
@@ -116,8 +150,21 @@ def get_conn(db_path: str) -> sqlite3.Connection:
     return conn
 
 
+def _migrate(conn: sqlite3.Connection) -> None:
+    """기존 DB에 누락된 컬럼을 추가한다(CREATE TABLE IF NOT EXISTS로는 안 되는 보정)."""
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(notices)")]
+    if cols and "content_text" not in cols:
+        conn.execute("ALTER TABLE notices ADD COLUMN content_text TEXT")
+    acols = [r[1] for r in conn.execute("PRAGMA table_info(notice_attachments)")]
+    if acols and "extracted_text" not in acols:
+        conn.execute("ALTER TABLE notice_attachments ADD COLUMN extracted_text TEXT")
+    if acols and "extraction_method" not in acols:
+        conn.execute("ALTER TABLE notice_attachments ADD COLUMN extraction_method TEXT")
+
+
 def init_db(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    _migrate(conn)
     conn.commit()
 
 

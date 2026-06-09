@@ -24,9 +24,10 @@ def run(conn, client, *, limit=None, force=False) -> Summary:
         for r in rows:
             conn.execute(
                 "INSERT OR REPLACE INTO forests "
-                "(instt_id, name, sido_code, arcd, instt_type_code, fetched_at) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (r["instt_id"], r["name"], sido, r["arcd"], r["instt_type_code"], now_iso()),
+                "(instt_id, name, sido_code, arcd, instt_type_code, instt_type, fetched_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (r["instt_id"], r["name"], sido, r["arcd"], r["instt_type_code"],
+                 r.get("instt_type"), now_iso()),
             )
             s.ok += 1
         conn.commit()

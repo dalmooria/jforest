@@ -8,8 +8,15 @@ def test_parse_json_returns_id_name_arcd_typecode():
     rows = parse_forest_list_json((FX / "forest_list_sido1.json").read_text(encoding="utf-8"))
     assert len(rows) >= 20
     sample = rows[0]
-    assert set(sample) == {"instt_id", "name", "arcd", "instt_type_code"}
+    assert set(sample) == {"instt_id", "name", "arcd", "instt_type_code", "instt_type"}
     assert all(r["instt_id"] for r in rows)
+
+def test_parse_json_derives_instt_type_label_from_code():
+    rows = parse_forest_list_json((FX / "forest_list_sido1.json").read_text(encoding="utf-8"))
+    seen = {r["instt_type_code"]: r["instt_type"] for r in rows}
+    label = {"01": "국립", "02": "공립", "04": "사립"}
+    for code, lab in seen.items():
+        assert lab == label.get(code)
 
 def test_parse_json_contains_known_forest():
     rows = parse_forest_list_json((FX / "forest_list_sido1.json").read_text(encoding="utf-8"))

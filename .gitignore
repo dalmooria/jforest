@@ -1,5 +1,9 @@
 __pycache__/
 *.pyc
 .venv/
+.env
 data/
 .pytest_cache/
+# GCP 서비스계정 키 (비밀, 커밋 금지)
+joforeset-*.json
+*-service-account*.json

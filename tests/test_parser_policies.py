@@ -1,6 +1,12 @@
 # tests/test_parser_policies.py
 from pathlib import Path
-from jforest.parsers.policies import parse_policy_all, parse_policy_detail
+from jforest.parsers.policies import (
+    parse_policy_all,
+    parse_policy_detail,
+    parse_policy_detail_menus,
+    parse_policy_detail_title,
+    policy_detail_title_or_default,
+)
 
 FX = Path(__file__).parent / "fixtures"
 
@@ -24,3 +30,16 @@ def test_parse_policy_detail_returns_text():
     txt = parse_policy_detail((FX / "policy_detail.html").read_text(encoding="utf-8"))
     assert txt and len(txt) > 20
     assert "선착순" in txt or "예약" in txt
+
+
+def test_parse_policy_detail_menus_returns_rule_links():
+    body = (FX / "policy_detail.html").read_text(encoding="utf-8")
+    menus = parse_policy_detail_menus(body)
+    assert any(m["rule_id"] == "101" for m in menus)
+    assert all(m["menu_id"] for m in menus)
+    assert parse_policy_detail_title(body)
+
+
+def test_policy_detail_title_falls_back_to_rule_id():
+    assert policy_detail_title_or_default("101", None) == "선착순 예약정책"
+    assert policy_detail_title_or_default("111", "") == "월추첨제 예약정책"

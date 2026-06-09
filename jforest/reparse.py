@@ -4,13 +4,19 @@ from jforest.parsers.forests import parse_forest_list_json, parse_forest_list_ht
 from jforest.parsers.rooms import parse_room_list
 from jforest.parsers.room_details import parse_room_detail
 from jforest.parsers.discounts import parse_discounts
-from jforest.parsers.policies import parse_policy_all, parse_policy_detail
+from jforest.parsers.policies import (
+    parse_policy_all,
+    parse_policy_detail,
+    parse_policy_detail_title,
+    policy_detail_title_or_default,
+)
 from jforest.parsers.notices import parse_notice_detail
 from jforest.crawlers.policies import _match_instt
 from jforest.util import now_iso
 
 _TABLES = ["forests", "rooms", "room_prices", "room_usage_texts", "discount_policies",
-           "reservation_policies", "notices", "notice_attachments", "fetch_log", "raw_pages"]
+           "reservation_policies", "reservation_policy_details", "notices",
+           "notice_attachments", "fetch_log", "raw_pages"]
 
 
 def status_counts(conn) -> dict:
@@ -29,9 +35,10 @@ def reparse(conn, step: str) -> int:
             for r in parse_forest_list_json(row["body"]):
                 conn.execute(
                     "INSERT OR REPLACE INTO forests "
-                    "(instt_id, name, sido_code, arcd, instt_type_code, fetched_at) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (r["instt_id"], r["name"], sido, r["arcd"], r["instt_type_code"], now_iso()),
+                    "(instt_id, name, sido_code, arcd, instt_type_code, instt_type, fetched_at) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (r["instt_id"], r["name"], sido, r["arcd"], r["instt_type_code"],
+                     r.get("instt_type"), now_iso()),
                 )
                 n += 1
         for row in get_raw_pages(conn, "forest_list_html"):
@@ -98,13 +105,14 @@ def reparse(conn, step: str) -> int:
             iid, twbbs = row["ref_key"].split(":", 1)
             d = parse_notice_detail(row["body"])
             conn.execute(
-                "INSERT OR REPLACE INTO notices (instt_id, twbbs_id, title, updated_at, body_text, fetched_at) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (iid, twbbs, d["title"], d["updated_at"], d["body_text"], now_iso()),
+                "INSERT OR REPLACE INTO notices (instt_id, twbbs_id, title, updated_at, body_text, content_text, fetched_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (iid, twbbs, d["title"], d["updated_at"], d["body_text"], d["content_text"], now_iso()),
             )
             for a in d["attachments"]:
+                # INSERT OR IGNORE: 이미 다운로드된 첨부의 downloaded/local_path/content_type를 보존한다.
                 conn.execute(
-                    "INSERT OR REPLACE INTO notice_attachments "
+                    "INSERT OR IGNORE INTO notice_attachments "
                     "(instt_id, twbbs_id, file_master_id, file_id, file_name, content_type, local_path, downloaded, fetched_at) "
                     "VALUES (?, ?, ?, ?, ?, NULL, NULL, 0, ?)",
                     (iid, twbbs, a["file_master_id"], a["file_id"], a.get("file_name"), now_iso()),
@@ -131,6 +139,16 @@ def reparse(conn, step: str) -> int:
         for row in get_raw_pages(conn, "policy_detail"):
             iid, rule = row["ref_key"].split(":", 1)
             txt = parse_policy_detail(row["body"])
+            title = policy_detail_title_or_default(rule, parse_policy_detail_title(row["body"]))
+            if title and txt:
+                conn.execute(
+                    "INSERT OR REPLACE INTO reservation_policy_details "
+                    "(instt_id, rule_id, menu_id, title, detail_text, fetched_at) "
+                    "VALUES (?, ?, "
+                    "(SELECT menu_id FROM reservation_policy_details WHERE instt_id=? AND rule_id=?), "
+                    "?, ?, ?)",
+                    (iid, rule, iid, rule, title, txt, now_iso()),
+                )
             col = "fcfs_detail" if rule == "101" else "lottery_detail"
             conn.execute(f"UPDATE reservation_policies SET {col}=? WHERE instt_id=?", (txt, iid))
     else:

@@ -1,8 +1,24 @@
 # jforest/parsers/policies.py
 import json
 import re
+from urllib.parse import parse_qs, urlparse
 
 from selectolax.parser import HTMLParser
+
+POLICY_DETAIL_TITLES = {
+    "100": "예약안내정책",
+    "101": "선착순 예약정책",
+    "102": "주말추첨제 예약정책",
+    "103": "성수기추첨제 예약정책",
+    "104": "지역주민우대추첨제 예약정책",
+    "105": "지역주민우선예약정책",
+    "106": "실버전용우선예약정책",
+    "107": "바우처우선예약정책",
+    "108": "장애인우선예약정책",
+    "111": "월추첨제 예약정책",
+    "112": "월추첨제 예약정책",
+    "211": "다자녀우선예약정책",
+}
 
 
 def _flag(text: str) -> int:
@@ -53,7 +69,50 @@ def parse_policy_detail(text: str) -> str:
     tree = HTMLParser(text)
     for tag in tree.css("script, style"):
         tag.decompose()
-    body = tree.body
+    detail = tree.css_first(".wd_txt")
+    body = detail or tree.body
     raw = body.text(separator="\n", strip=True) if body else ""
     cleaned = re.sub(r"\n{2,}", "\n", raw)
     return cleaned[:8000]
+
+
+def parse_policy_detail_title(text: str) -> str | None:
+    tree = HTMLParser(text)
+    for node in tree.css("h3"):
+        title = node.text(separator=" ", strip=True)
+        if title and "예약정책" in title:
+            return title
+    for node in tree.css("a.on"):
+        title = node.text(separator=" ", strip=True)
+        if title and "예약정책" in title:
+            return title
+    return None
+
+
+def policy_detail_title_or_default(rule_id: str, title: str | None = None) -> str | None:
+    return title or POLICY_DETAIL_TITLES.get(str(rule_id))
+
+
+def parse_policy_detail_menus(text: str) -> list[dict]:
+    tree = HTMLParser(text)
+    out = []
+    seen = set()
+    for a in tree.css("a"):
+        href = a.attributes.get("href") or ""
+        if "selectRsrvtGdncView.do" not in href:
+            continue
+        query = parse_qs(urlparse(href.replace("&amp;", "&")).query)
+        rule_id = (query.get("ruleId") or [None])[0]
+        menu_id = (query.get("menuId") or [None])[0]
+        if not rule_id:
+            continue
+        key = (rule_id, menu_id)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({
+            "rule_id": rule_id,
+            "menu_id": menu_id,
+            "title": a.text(separator=" ", strip=True) or None,
+        })
+    return out
