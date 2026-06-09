@@ -15,6 +15,18 @@ def test_find_info_menu_urls_picks_intro_and_program():
     assert "selectPrgrmListView" in urls["program"]
 
 
+def test_find_info_menu_urls_matches_name_variants():
+    # 휴양림 이름이 붙은 변형 메뉴명도 잡아야 한다(붉은오름 사례).
+    menu = """{"menuList":[
+      {"menuNm":"붉은오름자연휴양림안내","menuUrl":"/pot/rm/ri/selectRcrfrIntrdDtlView.do?hmpgId=ID1"},
+      {"menuNm":"목공체험 프로그램","menuUrl":"/pot/rm/fa/selectPrgrmListView.do?hmpgId=ID1"},
+      {"menuNm":"이용안내","menuUrl":"/pot/rm/ug/selectRsrvtGdncView.do?hmpgId=ID1"}
+    ]}"""
+    urls = find_info_menu_urls(menu)
+    assert "selectRcrfrIntrdDtlView" in urls["intro"]
+    assert "selectPrgrmListView" in urls["program"]
+
+
 def test_find_info_menu_urls_handles_missing_program():
     menu = '{"menuList":[{"menuNm":"자연휴양림안내","menuUrl":"/pot/rm/ri/x.do?hmpgId=ID1"}]}'
     urls = find_info_menu_urls(menu)

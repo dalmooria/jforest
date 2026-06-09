@@ -8,9 +8,24 @@ import json
 
 from selectolax.parser import HTMLParser
 
-# 메뉴명 → 우리가 수집할 페이지 종류
-_INTRO_NAMES = ("자연휴양림안내", "휴양림안내", "시설안내")
-_PROGRAM_NAMES = ("프로그램",)
+# 메뉴명 부분일치 토큰. 휴양림마다 "붉은오름자연휴양림안내", "목공체험 프로그램"처럼
+# 이름이 붙으므로 부분일치로 찾는다. 단, "예약안내/이용안내/시설이용안내"는 소개가 아니다.
+_INTRO_TOKEN = "휴양림안내"
+_INTRO_EXTRA = ("시설안내",)
+_PROGRAM_TOKEN = "프로그램"
+# 소개 URL은 이 엔드포인트여야 한다(이용안내 등 오탐 방지).
+_INTRO_URL_HINT = "selectRcrfrIntrdDtlView"
+_PROGRAM_URL_HINT = "selectPrgrmListView"
+
+
+def _is_intro(name: str, url: str) -> bool:
+    if _INTRO_URL_HINT in url:
+        return True
+    return _INTRO_TOKEN in name or name in _INTRO_EXTRA
+
+
+def _is_program(name: str, url: str) -> bool:
+    return _PROGRAM_URL_HINT in url or _PROGRAM_TOKEN in name
 
 
 def find_info_menu_urls(menu_json: str) -> dict:
@@ -28,9 +43,9 @@ def find_info_menu_urls(menu_json: str) -> dict:
         url = it.get("menuUrl") or ""
         if not url or url.startswith("javascript:"):
             continue
-        if out["intro"] is None and name in _INTRO_NAMES:
+        if out["intro"] is None and _is_intro(name, url):
             out["intro"] = url
-        elif out["program"] is None and name in _PROGRAM_NAMES:
+        elif out["program"] is None and _is_program(name, url):
             out["program"] = url
     return out
 
