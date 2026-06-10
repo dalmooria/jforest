@@ -97,7 +97,8 @@ def test_format_report_matches_expected_shape():
     assert "2026년 6월 10일 (수요일)" in text
     assert "선착순 예약 시작 휴양림 리스트" in text
     assert "1. 강씨봉자연휴양림" in text
-    assert "6주차 예약가능" in text
+    # 주간은 마지막 예약가능일(오픈일+6주-1=7/21 화)을 구체 표기
+    assert "6주차(~7/21 화) 예약가능" in text
 
 
 def test_report_includes_facility_flags_when_available():
@@ -112,7 +113,7 @@ def test_report_includes_facility_flags_when_available():
     rows = build_fcfs_report(conn, WED)
     assert rows[0]["water_play"] == "O" and rows[0]["barbecue"] == "X"
     text = format_report(rows, WED)
-    assert "물놀이(O), 바베큐(X), 숲해설(O), 6주차 예약가능" in text
+    assert "물놀이(O), 바베큐(X), 숲해설(O), 6주차(~7/21 화) 예약가능" in text
 
 
 def test_format_report_separates_monthly_highlight_from_weekly():

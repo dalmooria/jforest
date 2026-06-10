@@ -10,7 +10,7 @@
 (소스의 선착순 예약 페이지 bbqYn/otsdWeterYn 필터는 로그인 세션 필요).
 """
 import re
-from datetime import date
+from datetime import date, timedelta
 
 WEEKDAYS = ["월", "화", "수", "목", "금", "토", "일"]
 _WD_INDEX = {name: i for i, name in enumerate(WEEKDAYS)}
@@ -54,6 +54,25 @@ def _classify(method: str, detail: str):
             return "monthly", int(mon.group(1)), "익월 말일까지"
 
     return None
+
+
+_WEEKNUM_LABEL = re.compile(r"(\d+)주차")
+
+
+def _reservable_label(kind, week_label: str, on_date: date) -> str:
+    """예약가능 시점을 사람이 읽는 문구로 만든다.
+
+    주간: 오픈일(수)부터 N주 창이 열리므로 마지막 예약가능일 = 오픈일 + N*7 - 1일(화).
+          라이브 예약 캘린더(useDtList)로 검증됨(예: 6/10 오픈 → 6주차 = ~7/21 화).
+    월간: 휴양림별 편차가 커서 정책 문구('익월 말일까지')를 그대로 둔다.
+    """
+    if kind == "weekly":
+        m = _WEEKNUM_LABEL.search(week_label or "")
+        if m:
+            n = int(m.group(1))
+            last = on_date + timedelta(days=n * 7 - 1)
+            return f"{week_label}(~{last.month}/{last.day} {WEEKDAYS[last.weekday()]}) 예약가능"
+    return f"{week_label} 예약가능"
 
 
 def _opens_on(kind, key, on_date: date) -> bool:
@@ -107,6 +126,7 @@ def build_fcfs_report(conn, on_date: date) -> list:
                 "method": (r["fcfs_method"] or "").strip(),
                 "kind": kind,  # "weekly"(매주 반복) | "monthly"(오늘 지정 오픈)
                 "week_label": week_label,
+                "reservable_label": _reservable_label(kind, week_label, on_date),
                 "water_play": r["water_play"],
                 "barbecue": r["barbecue"],
                 "forest_guide": r["forest_guide"],
@@ -160,5 +180,5 @@ def _facility_line(r: dict) -> str:
         val = r.get(key)
         if val:
             parts.append(f"{label}({_MARK.get(val, '-')})")
-    parts.append(f"{r['week_label']} 예약가능")
+    parts.append(r.get("reservable_label") or f"{r['week_label']} 예약가능")
     return ", ".join(parts)
