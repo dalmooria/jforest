@@ -61,9 +61,20 @@ def _save_policy_detail(conn, iid, rule, menu, body, fetched_at):
     return title, text, menus
 
 
+def _norm_name(s: str) -> str:
+    return "".join((s or "").split()).replace("(", "").replace(")", "")
+
+
 def _match_instt(forests, name):
     if not name:
         return None
+    # 1) 정규화 완전일치 우선 — 이름 충돌 오매칭 방지.
+    #    (예: "광양백운산자연휴양림"이 "백운산 자연휴양림"에 부분매칭되던 버그)
+    key = _norm_name(name)
+    exact = [f["instt_id"] for f in forests if _norm_name(f["name"] or "") == key]
+    if len(exact) == 1:
+        return exact[0]
+    # 2) 폴백: 부분/코어 매칭 — 변형 메뉴명(휴양림명 접두) 대응.
     for f in forests:
         fn = f["name"] or ""
         if fn and (fn in name or name in fn):
