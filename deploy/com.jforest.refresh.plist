@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  로컬 맥에서 매일 04:00(KST) 예약오픈 데이터 갱신 → 스냅샷 export → git push(→ Vercel 자동 재배포).
+  설치:
+    cp deploy/com.jforest.refresh.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.jforest.refresh.plist
+  경로(WorkingDirectory/ProgramArguments)는 실제 설치 위치로 수정할 것.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jforest.refresh</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/sungwoojo/workspace/jforest</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/sungwoojo/workspace/jforest/deploy/refresh_and_publish.sh</string>
+    </array>
+
+    <!-- 매일 04:00 실행. 맥이 꺼져있었으면 다음 깨어날 때 보정 실행 -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key><integer>4</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/sungwoojo/workspace/jforest/data/refresh.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/sungwoojo/workspace/jforest/data/refresh.err.log</string>
+</dict>
+</plist>
