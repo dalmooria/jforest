@@ -10,7 +10,10 @@ bench/
 *.db
 *.db.bak
 *.log
+# 의존성 명세 격리: Vercel이 pyproject/uv.lock의 ML 스택(torch·transformers·qdrant)을
+# 설치하지 않도록 숨긴다. 함수는 루트 requirements.txt(fastapi만) 사용.
 uv.lock
+pyproject.toml
 joforeset-*.json
 *-service-account*.json
 __pycache__/

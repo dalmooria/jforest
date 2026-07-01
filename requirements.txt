@@ -1,0 +1,4 @@
+# Vercel 함수 의존성 (루트) — 최소로 유지. 번들 500MB 한도.
+# ⚠ pyproject.toml의 ML 스택(torch/transformers/qdrant/sentence-transformers)은
+#    .vercelignore로 숨겨 설치 대상에서 제외. 여기엔 fastapi만.
+fastapi>=0.110
