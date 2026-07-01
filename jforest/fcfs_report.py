@@ -459,3 +459,25 @@ def build_open_report(conn, on_date: date) -> dict:
         "uncertain": collect_uncertain(conn),
         "seasonal_note": SEASONAL_NOTE,
     }
+
+
+def format_open_report(report: dict) -> str:
+    """build_open_report(dict)를 터미널용 텍스트로 렌더한다(CLI/디버그)."""
+    lines = [f"{report['date']} ({report['weekday']}) 예약 오픈 — 총 {report['total']}곳"]
+    if report["total"] == 0:
+        lines.append("  (이 날짜에 열리는 휴양림 없음)")
+    for g in report["groups"]:
+        lines.append(f"\n━━ {g['type_group']} ({g['count']}) ━━")
+        for e in g["events"]:
+            t = e["open_time"] or "시각미상"
+            fac = f"물{e['water_play']}바{e['barbecue']}숲{e['forest_guide']}"
+            tag = "" if e["confidence"] == "확정" else f" [{e['confidence']}]"
+            lines.append(f"  {e['name']} / {e['region']} · {e['type_label']} · {t} · "
+                         f"{fac} · {e['reservable_label']}{tag}")
+    unc = report.get("uncertain") or []
+    if unc:
+        lines.append(f"\n⚠ 일정 확인 필요 {len(unc)}곳: "
+                     + ", ".join(f"{u['name']}({u['type_group']})" for u in unc[:10])
+                     + (" …" if len(unc) > 10 else ""))
+    lines.append(f"\n· {report['seasonal_note']}")
+    return "\n".join(lines) + "\n"

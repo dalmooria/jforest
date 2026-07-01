@@ -335,6 +335,19 @@ def fcfs_report(ctx, date_str):
     click.echo(format_report(rows, on_date))
 
 
+@main.command("open-report")
+@click.option("--date", "date_str", default=None, help="기준일 YYYY-MM-DD (기본: 오늘)")
+@click.pass_context
+def open_report_cmd(ctx, date_str):
+    """해당일에 예약창이 열리는 휴양림(선착순·추첨·지역주민)을 리포팅한다."""
+    from datetime import date as _date
+
+    from jforest.fcfs_report import build_open_report, format_open_report
+
+    on_date = _date.fromisoformat(date_str) if date_str else _date.today()
+    click.echo(format_open_report(build_open_report(ctx.obj["conn"], on_date)))
+
+
 @main.command("export-serving")
 @click.option("--out", "out_path", default="api/serving.sqlite",
               help="서빙 스냅샷 경로 (기본: api/serving.sqlite)")
