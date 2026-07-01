@@ -10,6 +10,7 @@
 (소스의 선착순 예약 페이지 bbqYn/otsdWeterYn 필터는 로그인 세션 필요).
 """
 import re
+import unicodedata
 from datetime import date, timedelta
 
 WEEKDAYS = ["월", "화", "수", "목", "금", "토", "일"]
@@ -182,3 +183,279 @@ def _facility_line(r: dict) -> str:
             parts.append(f"{label}({_MARK.get(val, '-')})")
     parts.append(r.get("reservable_label") or f"{r['week_label']} 예약가능")
     return ", ".join(parts)
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Open Report (v2): 선착순 + 추첨 + 지역주민 + 일반오픈(15일)  (설계 §3)
+# ─────────────────────────────────────────────────────────────────────────
+
+SIDO = {1: "경기·인천", 2: "강원", 3: "충북", 4: "충남·대전", 5: "전북",
+        6: "전남·광주", 7: "경북·대구", 8: "경남·부산·울산", 9: "제주"}
+
+# rule_id → type_group. 101(선착순)은 reservation_policies로만 처리하므로 여기 제외.
+# 103=성수기(별도), 106/107/108/112/211=제외(자격제한).
+RULE_GROUP = {"102": "추첨", "111": "추첨",
+              "104": "지역주민", "105": "지역주민"}
+RULE_LABEL = {"102": "주말추첨", "111": "월추첨",
+              "104": "지역주민 우대추첨", "105": "지역주민 우선"}
+# 국립 표준 오픈일 상수 폴백 (파싱 실패 시). (kind, day, time)
+NATIONAL_DEFAULT = {"102": ("monthly", 4, "오전 9시"), "111": ("monthly", 1, "오전 9시")}
+GENERAL_OPEN = ("monthly", 15, "오전 9시")  # 일반오픈(미선정분): 102 보유 휴양림
+
+SEASONAL_NOTE = ("성수기추첨: 매년 5월말~6월 접수 / 이용 7·8월 / 45개 국립휴양림 "
+                 "— 접수기간은 숲나들e 공지 확인")
+
+_GROUP_ORDER = {"선착순": 0, "추첨": 1, "지역주민": 2}
+
+_ANCHORS = ["예약 신청", "예약신청", "신청 접수 기간", "신청접수기간",
+            "추첨 예약 신청", "추첨예약신청", "접수 기간", "우선 예약", "우선예약"]
+_SECTION_MARK = re.compile(r"[○※▶■]|(?<!\d)-\s")
+_RE_MONTHLY = re.compile(r"매[월달]\s*(\d{1,2})\s*일")
+_RE_WEEKLY = re.compile(r"매주\s*([월화수목금토일])\s*요일")
+_RE_WEEKLY_BARE = re.compile(r"^[\s:]*([월화수목금토일])요일")
+_RE_TIME_AMPM = re.compile(r"(오전|오후)\s*(\d{1,2})\s*시")
+_RE_TIME_HHMM = re.compile(r"(\d{1,2})\s*:\s*(\d{2})")
+
+
+def _region(sido_code) -> str:
+    return SIDO.get(sido_code, "기타")
+
+
+def _normalize(text: str) -> str:
+    """NFKC 정규화 + 모든 공백 단일화(HWP 추출의 글자단위 줄바꿈 제거)."""
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", text or ""))
+
+
+def _anchored_segment(norm_text: str):
+    """가장 이른 '예약신청' 앵커부터 다음 섹션 마커 직전까지의 세그먼트."""
+    best_i, seg = None, None
+    for a in _ANCHORS:
+        i = norm_text.find(a)
+        if i != -1 and (best_i is None or i < best_i):
+            after = norm_text[i + len(a):]
+            m = _SECTION_MARK.search(after)
+            seg = after[: m.start()] if m else after[:80]
+            best_i = i
+    return seg
+
+
+def _fmt_time(hour: int, minute: int = 0) -> str:
+    ampm = "오전" if hour < 12 else "오후"
+    h12 = hour if hour <= 12 else hour - 12
+    if h12 == 0:
+        h12 = 12
+    return f"{ampm} {h12}시" + (f" {minute}분" if minute else "")
+
+
+def _match_time(seg: str):
+    if not seg:
+        return None
+    m = _RE_TIME_AMPM.search(seg)
+    if m:
+        h = int(m.group(2))
+        return _fmt_time(h + 12 if m.group(1) == "오후" and h < 12 else h)
+    m = _RE_TIME_HHMM.search(seg)
+    if m:
+        return _fmt_time(int(m.group(1)), int(m.group(2)))
+    return None
+
+
+def parse_open_event(detail_text: str, rule_id: str):
+    """추첨/지역주민 예약창 오픈일·시각을 파싱한다.
+
+    반환: {"kind","key","open_time","time_conf","conf"} 또는 None(날짜 파싱 실패).
+    파싱 실패 시 국립 표준 상수 폴백을 시도한다.
+    """
+    seg = _anchored_segment(_normalize(detail_text))
+    kind = key = None
+    if seg:
+        m = _RE_WEEKLY.search(seg) or _RE_WEEKLY_BARE.search(seg)
+        if m:
+            kind, key = "weekly", _WD_INDEX[m.group(1)]
+        else:
+            m = _RE_MONTHLY.search(seg)
+            if m:
+                kind, key = "monthly", int(m.group(1))
+    if kind is None:
+        d = NATIONAL_DEFAULT.get(rule_id)
+        if not d:
+            return None
+        return {"kind": d[0], "key": d[1], "open_time": d[2],
+                "time_conf": "확정", "conf": "추정"}
+    tm = _match_time(seg)
+    return {"kind": kind, "key": key, "open_time": tm,
+            "time_conf": "확정" if tm else "미상", "conf": "확정"}
+
+
+def _open_time_from_fcfs(fcfs_detail: str):
+    """선착순 fcfs_detail 본문에서 오픈 시각을 뽑는다(국립은 대개 '오전 9시')."""
+    return _match_time(_normalize(fcfs_detail))
+
+
+def _fac_mark(val, needs_review) -> str:
+    if needs_review:
+        return "△"
+    return {"O": "O", "X": "X"}.get(val, "△")
+
+
+def _facilities_map(conn) -> dict:
+    if not _has_facilities(conn):
+        return {}
+    out = {}
+    for r in conn.execute(
+        "SELECT instt_id, water_play, barbecue, forest_guide, needs_review "
+        "FROM forest_facilities"
+    ):
+        out[r["instt_id"]] = (
+            _fac_mark(r["water_play"], r["needs_review"]),
+            _fac_mark(r["barbecue"], r["needs_review"]),
+            _fac_mark(r["forest_guide"], r["needs_review"]),
+        )
+    return out
+
+
+def _forest_meta(conn) -> dict:
+    return {r["instt_id"]: (r["name"], _region(r["sido_code"]))
+            for r in conn.execute("SELECT instt_id, name, sido_code FROM forests")}
+
+
+def _reservable(group, type_label, kind, week_label, on_date, confidence) -> str:
+    if confidence == "미상":
+        return "일정 확인 필요"
+    if group == "선착순":
+        if type_label.startswith("일반오픈"):
+            return "추첨 미선정·취소분 오픈"
+        if kind == "weekly":
+            return _reservable_label(kind, week_label, on_date)
+        return "익월 말일 이용분 예약가능"
+    if group == "추첨":
+        return "다음달 이용분 접수 시작"
+    if group == "지역주민":
+        return "지역주민 우선 접수"
+    return "예약 오픈"
+
+
+def _event(instt_id, meta, fac, group, type_label, kind, week_label,
+           open_time, time_conf, on_date, conf):
+    name, region = meta.get(instt_id, ("(미상)", "기타"))
+    wp, bbq, fg = fac.get(instt_id, ("△", "△", "△"))
+    return {
+        "instt_id": instt_id, "name": (name or "").strip(), "region": region,
+        "type_group": group, "type_label": type_label,
+        "kind": kind, "open_time": open_time, "time_confidence": time_conf,
+        "reservable_label": _reservable(group, type_label, kind, week_label, on_date, conf),
+        "confidence": conf,
+        "water_play": wp, "barbecue": bbq, "forest_guide": fg,
+    }
+
+
+def _merge_and_sort(events):
+    """(instt_id, group, open_time) 병합 → 그룹/미상/지역/이름 정렬."""
+    merged = {}
+    for e in events:
+        k = (e["instt_id"], e["type_group"], e["open_time"])
+        if k in merged:
+            labels = merged[k]["type_label"].split("·")
+            if e["type_label"] not in labels:
+                merged[k]["type_label"] += "·" + e["type_label"]
+        else:
+            merged[k] = e
+
+    def key(e):
+        return (_GROUP_ORDER.get(e["type_group"], 9),
+                1 if e["confidence"] == "미상" else 0,
+                e["region"] or "", e["name"])
+
+    return sorted(merged.values(), key=key)
+
+
+def build_open_events(conn, on_date: date) -> list:
+    """on_date에 예약창이 열리는 채널(이벤트) 목록을 반환한다(병합·정렬 완료)."""
+    meta = _forest_meta(conn)
+    fac = _facilities_map(conn)
+    events = []
+
+    # (1) 선착순 — reservation_policies + 기존 _classify
+    for r in conn.execute(
+        "SELECT instt_id, fcfs_method, fcfs_detail FROM reservation_policies"
+    ):
+        c = _classify(r["fcfs_method"], r["fcfs_detail"])
+        if not c:
+            continue
+        kind, key, week_label = c
+        if not _opens_on(kind, key, on_date):
+            continue
+        tm = _open_time_from_fcfs(r["fcfs_detail"])
+        events.append(_event(r["instt_id"], meta, fac, "선착순", "선착순",
+                             kind, week_label, tm, "확정" if tm else "미상",
+                             on_date, "확정"))
+
+    # (2) 추첨·지역주민 — reservation_policy_details
+    for r in conn.execute(
+        "SELECT instt_id, rule_id, detail_text FROM reservation_policy_details"
+    ):
+        group = RULE_GROUP.get(r["rule_id"])
+        if not group:
+            continue
+        pe = parse_open_event(r["detail_text"], r["rule_id"])
+        if pe is None:
+            continue  # 미상은 build_open_report의 별도 리스트로 (날짜 오탐 방지)
+        if not _opens_on(pe["kind"], pe["key"], on_date):
+            continue
+        events.append(_event(r["instt_id"], meta, fac, group,
+                             RULE_LABEL.get(r["rule_id"], group),
+                             pe["kind"], None, pe["open_time"], pe["time_conf"],
+                             on_date, pe["conf"]))
+
+    # (3) 일반오픈(미선정분) — 102 보유 휴양림, 매월 15일
+    if on_date.day == GENERAL_OPEN[1]:
+        for r in conn.execute(
+            "SELECT DISTINCT instt_id FROM reservation_policy_details WHERE rule_id='102'"
+        ):
+            events.append(_event(r["instt_id"], meta, fac, "선착순",
+                                 "일반오픈(미선정분)", "general", None,
+                                 GENERAL_OPEN[2], "확정", on_date, "추정"))
+
+    return _merge_and_sort(events)
+
+
+def collect_uncertain(conn) -> list:
+    """오픈일 파싱 불가한 추첨/지역주민 채널(날짜 무관 참고용). (instt_id,group) 유일."""
+    meta = _forest_meta(conn)
+    seen, out = set(), []
+    for r in conn.execute(
+        "SELECT instt_id, rule_id, detail_text FROM reservation_policy_details"
+    ):
+        group = RULE_GROUP.get(r["rule_id"])
+        if not group:
+            continue
+        if parse_open_event(r["detail_text"], r["rule_id"]) is not None:
+            continue
+        k = (r["instt_id"], group)
+        if k in seen:
+            continue
+        seen.add(k)
+        name, region = meta.get(r["instt_id"], ("(미상)", "기타"))
+        out.append({"instt_id": r["instt_id"], "name": (name or "").strip(),
+                    "region": region, "type_group": group,
+                    "type_label": RULE_LABEL.get(r["rule_id"], group)})
+    out.sort(key=lambda e: (_GROUP_ORDER.get(e["type_group"], 9), e["region"], e["name"]))
+    return out
+
+
+def build_open_report(conn, on_date: date) -> dict:
+    """API/JSON용 리포트 dict. 타입별 그룹 + 미상 참고 + 성수기 안내."""
+    events = build_open_events(conn, on_date)
+    groups = []
+    for g in ("선착순", "추첨", "지역주민"):
+        evs = [e for e in events if e["type_group"] == g]
+        if evs:
+            groups.append({"type_group": g, "count": len(evs), "events": evs})
+    return {
+        "date": on_date.isoformat(),
+        "weekday": WEEKDAYS[on_date.weekday()],
+        "total": len(events),
+        "groups": groups,
+        "uncertain": collect_uncertain(conn),
+        "seasonal_note": SEASONAL_NOTE,
+    }
