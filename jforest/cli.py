@@ -335,6 +335,22 @@ def fcfs_report(ctx, date_str):
     click.echo(format_report(rows, on_date))
 
 
+@main.command("export-serving")
+@click.option("--out", "out_path", default="api/serving.sqlite",
+              help="서빙 스냅샷 경로 (기본: api/serving.sqlite)")
+@click.pass_context
+def export_serving_cmd(ctx, out_path):
+    """웹 서빙용 경량 SQLite 스냅샷을 만든다(Vercel 배포용, ~2MB)."""
+    from jforest.export_serving import export_serving
+
+    counts = export_serving(ctx.obj["db"], out_path)
+    for table, n in counts.items():
+        if table == "_bytes":
+            click.echo(f"{'→ 크기':32} {n/1024/1024:.2f} MB  ({out_path})")
+        else:
+            click.echo(f"{table:32} {n}")
+
+
 @main.command()
 @click.pass_context
 def status(ctx):
