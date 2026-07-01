@@ -271,16 +271,17 @@ def build_open_events(conn, on_date):
 
 ## 6. 구현 순서
 
-**Phase 0 — 데이터 리프레시(선행, §7b)**
-0. `jforest crawl policies` 재실행(또는 저장 raw로 `reparse`) → `reservation_policies` 정합화(상세정책 소멸). 비FRIP 14곳 `정책 정보없음` 태깅. 검증: `상세정책` 카운트 ≤ (비FRIP 잔여).
+**Phase 0 — 데이터 리프레시(선행, §7b) ✅ 완료**
+0. 정규화 완전일치로 `reservation_policies` 정합화(FRIP 171곳, 상세정책 18→14=비FRIP만).
+   `_match_instt` 완전일치 우선 수정(34ec2fd)으로 이름충돌(백운산) 재오염 방지 + 월간 재크롤 자동치유.
 
-**Phase 1**
-1. `fcfs_report.py` 로직층 + 단위테스트(파서 커버리지 확보)
-2. `api.py` JSON 엔드포인트 + API 테스트
-3. `/open` HTML UI
-4. `cli.py` 터미널 명령(선택)
+**Phase 1 ✅ 완료** (6a8fad8 로직 · 7a69bce 웹 · 38cd59b CLI)
+1. ✅ `fcfs_report.py` 로직층 `build_open_events`/`build_open_report` + 테스트 18개
+2. ✅ `api/index.py` `/api/open-report` JSON(date/region 필터·400·최종갱신) + 테스트 6개
+3. ✅ `/open` 반응형 UI (모바일 1열·데스크톱 2열, Playwright 375/1200 검증)
+4. ✅ `jforest open-report --date` 터미널 명령 + `format_open_report`
 
-**Phase 2**
+**Phase 2 (예정)**
 5. `db.py` `reservation_blocks` + `crawlers/notices.py` 증분 보완
 6. `alerts.py` 분류+구조화 + 테스트
 7. `build_open_events`에 block 조인 + UI 배지

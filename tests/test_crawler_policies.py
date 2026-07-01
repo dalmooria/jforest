@@ -32,3 +32,22 @@ def test_run_matches_and_fills_detail():
     # 개별 정책 raw도 복합 ref_key로 저장
     pd = conn.execute("SELECT COUNT(*) FROM raw_pages WHERE page_type='policy_detail' AND ref_key LIKE '0113:%'").fetchone()[0]
     assert pd >= 1
+
+
+def test_match_instt_prefers_exact_over_substring():
+    """이름 충돌 시 정규화 완전일치를 부분매칭보다 우선한다.
+
+    '광양백운산자연휴양림'이 '백운산 자연휴양림'에 부분매칭되어 엉뚱한 iid로
+    라우팅되던 회귀 버그를 막는다.
+    """
+    from jforest.crawlers.policies import _match_instt
+
+    forests = [
+        {"instt_id": "0223", "name": "백운산 자연휴양림"},
+        {"instt_id": "ID02030061", "name": "광양백운산자연휴양림"},
+    ]
+    # 완전일치가 있으면 그것을 반환 (부분매칭 0223로 새지 않음)
+    assert _match_instt(forests, "광양백운산자연휴양림") == "ID02030061"
+    assert _match_instt(forests, "백운산 자연휴양림") == "0223"
+    # 완전일치가 없으면 부분매칭 폴백 유지 (변형 메뉴명 대응)
+    assert _match_instt(forests, "백운산 자연휴양림 물놀이장") == "0223"
