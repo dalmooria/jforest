@@ -1,0 +1,23 @@
+# Vercel 업로드 제외 — 함수 번들을 작게 유지.
+# 원본 대용량 DB/인덱스/첨부/가상환경/테스트는 절대 올리지 않는다.
+# (api/serving.sqlite 은 제외하지 않음 → 반드시 업로드되어야 함)
+data/
+.venv/
+.pytest_cache/
+tests/
+docs/
+bench/
+*.db
+*.db.bak
+*.log
+uv.lock
+joforeset-*.json
+*-service-account*.json
+__pycache__/
+*.pyc
+# 무거운 서브모듈: Vercel 함수는 fcfs_report만 import하므로 불필요
+jforest/rag.py
+jforest/embeddings.py
+jforest/vector_index.py
+jforest/bench.py
+jforest/answer_eval.py
