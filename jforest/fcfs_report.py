@@ -191,6 +191,8 @@ def _facility_line(r: dict) -> str:
 
 SIDO = {1: "경기·인천", 2: "강원", 3: "충북", 4: "충남·대전", 5: "전북",
         6: "전남·광주", 7: "경북·대구", 8: "경남·부산·울산", 9: "제주"}
+# 지리적 정렬 순서(수도권→강원→충청→…→제주). 지역명 가나다 대신 사용.
+_REGION_ORDER = {name: i for i, name in SIDO.items()}
 
 # rule_id → type_group. 101(선착순)은 reservation_policies로만 처리하므로 여기 제외.
 # 103=성수기(별도), 106/107/108/112/211=제외(자격제한).
@@ -364,7 +366,7 @@ def _merge_and_sort(events):
     def key(e):
         return (_GROUP_ORDER.get(e["type_group"], 9),
                 1 if e["confidence"] == "미상" else 0,
-                e["region"] or "", e["name"])
+                _REGION_ORDER.get(e["region"], 99), e["name"])
 
     return sorted(merged.values(), key=key)
 
@@ -439,7 +441,43 @@ def collect_uncertain(conn) -> list:
         out.append({"instt_id": r["instt_id"], "name": (name or "").strip(),
                     "region": region, "type_group": group,
                     "type_label": RULE_LABEL.get(r["rule_id"], group)})
-    out.sort(key=lambda e: (_GROUP_ORDER.get(e["type_group"], 9), e["region"], e["name"]))
+    out.sort(key=lambda e: (_GROUP_ORDER.get(e["type_group"], 9),
+                            _REGION_ORDER.get(e["region"], 99), e["name"]))
+    return out
+
+
+# 대부분의 날은 오픈이 없다(오픈은 수/1일/4일/15일에 집중) → 다가오는 주요 오픈일 안내.
+_UPCOMING_SPECS = [
+    ("선착순 (국립 주간)", "weekly", 2, "오전 9시"),   # 수요일
+    ("월간 (익월말·월추첨)", "monthly", 1, "오전 9시"),
+    ("주말추첨 접수", "monthly", 4, "오전 9시"),
+    ("일반오픈 (미선정분)", "monthly", 15, "오전 9시"),
+]
+
+
+def _next_date(start: date, pred, within: int = 45):
+    d = start
+    for _ in range(within):
+        if pred(d):
+            return d
+        d += timedelta(days=1)
+    return None
+
+
+def upcoming_openings(on_date: date) -> list:
+    """on_date 이후 다가오는 주요 오픈일(D-day)."""
+    out = []
+    for label, kind, key, tm in _UPCOMING_SPECS:
+        if kind == "weekly":
+            pred = (lambda d, k=key: d.weekday() == k)
+        else:
+            pred = (lambda d, k=key: d.day == k)
+        d = _next_date(on_date + timedelta(days=1), pred)
+        if d:
+            out.append({"label": label, "date": d.isoformat(),
+                        "weekday": WEEKDAYS[d.weekday()], "dday": (d - on_date).days,
+                        "open_time": tm})
+    out.sort(key=lambda x: x["dday"])
     return out
 
 
@@ -457,6 +495,7 @@ def build_open_report(conn, on_date: date) -> dict:
         "total": len(events),
         "groups": groups,
         "uncertain": collect_uncertain(conn),
+        "upcoming": upcoming_openings(on_date),
         "seasonal_note": SEASONAL_NOTE,
     }
 

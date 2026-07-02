@@ -215,3 +215,35 @@ def test_empty_day_returns_no_groups():
     conn.commit()
     rep = build_open_report(conn, THU)  # 목요일 → 아무것도 안 열림
     assert rep["total"] == 0 and rep["groups"] == []
+
+
+def test_upcoming_openings_from_empty_thursday():
+    from jforest.fcfs_report import upcoming_openings
+    up = upcoming_openings(THU)  # 2026-07-02 목
+    labels = {u["label"]: u for u in up}
+    # 다음 수요일 = 7/8 (D-6), 다음 4일 = 8/4, 다음 15일 = 7/15, 다음 1일 = 8/1
+    assert labels["선착순 (국립 주간)"]["date"] == "2026-07-08"
+    assert labels["선착순 (국립 주간)"]["dday"] == 6
+    assert labels["일반오픈 (미선정분)"]["date"] == "2026-07-15"
+    assert all(u["dday"] > 0 for u in up)  # 모두 미래
+
+
+def test_report_includes_upcoming():
+    conn = _conn()
+    _forest(conn, "0101", "수요일휴양림")
+    _policy(conn, "0101", "6주 수요일", "매주 수요일 오전 9시")
+    conn.commit()
+    rep = build_open_report(conn, THU)  # 빈 날
+    assert rep["total"] == 0 and len(rep["upcoming"]) == 4
+
+
+def test_region_sort_is_geographic_not_alphabetical():
+    conn = _conn()
+    _forest(conn, "A", "제주휴양림", sido=9)
+    _policy(conn, "A", "6주 수요일", "매주 수요일 오전 9시")
+    _forest(conn, "B", "경기휴양림", sido=1)
+    _policy(conn, "B", "6주 수요일", "매주 수요일 오전 9시")
+    conn.commit()
+    ev = build_open_events(conn, WED)
+    # 지리순: 경기·인천(1)이 제주(9)보다 먼저 (가나다면 '경기'<'제주'지만 sido순 보장)
+    assert [e["region"] for e in ev] == ["경기·인천", "제주"]

@@ -135,7 +135,15 @@ _HTML = """<!DOCTYPE html>
   .resv { color:var(--mut); font-size:.8rem; margin-top:4px; }
   details { margin-top:14px; } summary { cursor:pointer; color:var(--mut); font-size:.85rem; }
   .note { margin-top:16px; font-size:.75rem; color:var(--mut); border-top:1px dashed var(--bd); padding-top:8px; }
-  .empty { color:var(--mut); padding:24px 0; text-align:center; }
+  .empty { color:var(--mut); padding:20px 0; text-align:center; line-height:1.6; }
+  .upwrap { margin:8px 0 4px; }
+  .uptitle { font-size:.8rem; color:var(--mut); margin-bottom:6px; }
+  .ups { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; }
+  .up { flex:0 0 auto; min-height:44px; display:flex; flex-direction:column; justify-content:center;
+        background:#fff; border:1px solid var(--bd); border-radius:12px; padding:8px 12px;
+        text-decoration:none; color:#1d1d1f; font-size:.78rem; }
+  .up b { font-weight:700; margin:2px 0; }
+  .up span { color:var(--accent); font-weight:700; font-size:.72rem; }
 </style></head>
 <body><div class="wrap">
   <h1>🌲 날짜별 예약오픈 안내</h1>
@@ -173,11 +181,16 @@ function section(title, evs){
   if(!evs.length) return '';
   return `<div class="sub">${title} (${evs.length})</div><div class="cards">${evs.map(card).join('')}</div>`;
 }
+function upcomingHtml(u){
+  if(!u||!u.length) return '';
+  const chips=u.map(x=>`<a class="up" href="#" data-d="${x.date}">${x.label}<b>${x.date.slice(5).replace('-','/')} (${x.weekday})</b><span>D-${x.dday} · ${x.open_time}</span></a>`).join('');
+  return `<div class="upwrap"><div class="uptitle">📅 다가오는 주요 오픈 (탭하면 이동)</div><div class="ups">${chips}</div></div>`;
+}
 function render(rep){
   $('meta').textContent = `${rep.date} (${rep.weekday}) · 총 ${rep.total}곳`
     + (rep.generated_at?` · 최종 갱신 ${rep.generated_at.slice(0,10)}`:'');
-  let h='';
-  if(rep.total===0) h+='<div class="empty">이 날짜에 예약이 열리는 휴양림이 없습니다.</div>';
+  let h=upcomingHtml(rep.upcoming);
+  if(rep.total===0) h+='<div class="empty">이 날짜엔 예약이 열리는 휴양림이 없어요.<br>위 <b>다가오는 주요 오픈</b>을 탭해 확인하세요.</div>';
   for(const g of rep.groups){
     h+=`<div class="grp">${g.type_group}</div>`;
     if(g.type_group==='선착순'){
@@ -211,6 +224,11 @@ async function load(){
 function shift(days){const d=new Date($('date').value);d.setDate(d.getDate()+days);$('date').value=d.toISOString().slice(0,10);load();}
 $('prev').onclick=()=>shift(-1); $('next').onclick=()=>shift(1);
 $('date').onchange=load; rsel.onchange=load;
+$('out').addEventListener('click',e=>{
+  const a=e.target.closest('.up'); if(!a) return;
+  e.preventDefault(); $('date').value=a.dataset.d; load();
+  window.scrollTo(0,0);
+});
 load();
 </script>
 </body></html>
