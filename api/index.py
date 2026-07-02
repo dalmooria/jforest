@@ -172,6 +172,13 @@ const chips=$('chips');
   b.onclick=()=>{REGION=val; [...chips.children].forEach(c=>c.classList.toggle('on',c===b)); apply();};
   chips.appendChild(b);
 });
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function safeUrl(u){ // http(s)만 허용 + http→https 업그레이드(mixed-content 방지)
+  if(!u) return ''; const s=String(u).trim();
+  if(/^https:\/\//i.test(s)) return s;
+  if(/^http:\/\//i.test(s)) return 'https://'+s.slice(7);
+  return '';
+}
 function kstToday(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);}
 $('date').value=kstToday();
 function fCls(v){return v==='O'?'fO':v==='X'?'fX':'fT';}
@@ -186,17 +193,18 @@ function mmdd(d){return d?d.slice(5).replace('-','/'):'';}
 function alertBadge(e){
   if(!e.alerts||!e.alerts.length) return '';
   const a=e.alerts[0];
-  return `<span class="badge b-alert">⚠ ${a.alert_type}${a.end_date?' ~'+mmdd(a.end_date):''}</span>`;
+  return `<span class="badge b-alert">⚠ ${esc(a.alert_type)}${a.end_date?' ~'+mmdd(a.end_date):''}</span>`;
 }
 function card(e){
-  const title=e.homepage_url
-    ? `<a class="nm" href="${e.homepage_url}" target="_blank" rel="noopener">${e.name} ↗</a>`
-    : `<span class="nm plain">${e.name}</span>`;
+  const url=safeUrl(e.homepage_url);
+  const title=url
+    ? `<a class="nm" href="${url}" target="_blank" rel="noopener">${esc(e.name)} ↗</a>`
+    : `<span class="nm plain">${esc(e.name)}</span>`;
   const warn=(e.alerts&&e.alerts.length)?' warn':'';
-  return `<div class="card${warn}">${title} <span class="rg">${e.region}</span>
+  return `<div class="card${warn}">${title} <span class="rg">${esc(e.region)}</span>
     <div class="row2">
-      <span class="badge b-type">${e.type_label}</span>
-      <span class="badge b-time">${e.open_time||'시각 미상'}</span>
+      <span class="badge b-type">${esc(e.type_label)}</span>
+      <span class="badge b-time">${esc(e.open_time)||'시각 미상'}</span>
       ${e.confidence==='추정'?'<span class="badge b-est">추정</span>':''}
       ${e.confidence==='미상'?'<span class="badge b-unk">일정 확인</span>':''}
       ${alertBadge(e)}
@@ -236,15 +244,15 @@ function apply(){
   const restr=filt(REP.restrictions||[]);
   if(restr.length){
     h+=`<details><summary>⚠ 이용 제한 안내 · 공사/예약제외/휴관 (${restr.length})</summary><div class="cards">`
-      +restr.map(r=>`<div class="card warn"><span class="nm plain">${r.name}</span> <span class="rg">${r.region}</span>
-        <div class="row2"><span class="badge b-alert">⚠ ${r.alert_type}${r.end_date?' ~'+mmdd(r.end_date):''}</span></div>
-        <div class="resv">${r.reason}</div></div>`).join('')
+      +restr.map(r=>`<div class="card warn"><span class="nm plain">${esc(r.name)}</span> <span class="rg">${esc(r.region)}</span>
+        <div class="row2"><span class="badge b-alert">⚠ ${esc(r.alert_type)}${r.end_date?' ~'+mmdd(r.end_date):''}</span></div>
+        <div class="resv">${esc(r.reason)}</div></div>`).join('')
       +`</div></details>`;
   }
   if(unc.length){
     h+=`<details><summary>⚠ 일정 확인 필요 (${unc.length})</summary><div class="cards">`
-      +unc.map(u=>`<div class="card"><span class="nm plain">${u.name}</span> <span class="rg">${u.region}</span>
-        <div class="row2"><span class="badge b-type">${u.type_label}</span><span class="badge b-unk">일정 확인</span></div></div>`).join('')
+      +unc.map(u=>`<div class="card"><span class="nm plain">${esc(u.name)}</span> <span class="rg">${esc(u.region)}</span>
+        <div class="row2"><span class="badge b-type">${esc(u.type_label)}</span><span class="badge b-unk">일정 확인</span></div></div>`).join('')
       +`</div></details>`;
   }
   h+=`<div class="note">${REP.seasonal_note}</div>`;

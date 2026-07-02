@@ -86,9 +86,38 @@ def parse_period(text: str):
     return None
 
 
+# 본문에서 기간을 찾을 때, 관련 없는 날짜(요금개정일 등) 오참조를 줄이기 위해
+# 기간을 암시하는 앵커 근처만 탐색한다.
+_BODY_PERIOD_ANCHORS = ["기간", "까지", "공사", "휴관", "폐쇄", "운영 중단", "운영중단",
+                        "운영 중지", "제한", "일정", "예약 불가", "예약불가", "이용 불가"]
+
+
+def _body_period(body: str, notice_date: str = None):
+    """본문에서 기간 파싱.
+
+    1) '기간 암시 앵커'(공사기간·휴관 등) 근처를 우선 탐색(정밀).
+    2) 없으면 본문의 첫 기간을 쓰되, 공지일(notice_date)보다 먼저 끝나는 기간은
+       과거 참조(요금개정일 등)로 보고 배제한다(오참조 방지 + recall 유지).
+    """
+    t = (body or "")[:1000]
+    for a in _BODY_PERIOD_ANCHORS:
+        i = t.find(a)
+        if i != -1:
+            p = parse_period(t[max(0, i - 12): i + 60])
+            if p:
+                return p
+    p = parse_period(t)
+    if p and (not notice_date or p[1] >= notice_date[:10]):
+        return p
+    return None
+
+
 def extract_blocks(conn, since: str = "2025-01-01") -> int:
-    """관련 공지에서 블록을 추출해 reservation_blocks에 적재한다. 적재 건수 반환."""
-    conn.execute("DELETE FROM reservation_blocks")
+    """관련 공지에서 블록을 추출해 reservation_blocks에 적재한다. 적재 건수 반환.
+
+    DELETE+INSERT를 단일 트랜잭션(`with conn`)으로 묶어, 중간 실패 시 기존 데이터가
+    비워진 채 남지 않도록 한다(성공 시 커밋, 예외 시 롤백).
+    """
     like = " OR ".join("title LIKE ?" for _ in _RELEVANT)
     params = [f"%{k}%" for k in _RELEVANT]
     rows = conn.execute(
@@ -98,30 +127,31 @@ def extract_blocks(conn, since: str = "2025-01-01") -> int:
     ).fetchall()
     n = 0
     ts = now_iso()
-    for r in rows:
-        atype = classify(r["title"])
-        if not atype:
-            continue
-        # 기간은 제목 우선, 없으면 본문 앞부분(관련 기간이 상단에 오는 경향)에서 탐색.
-        period = parse_period(r["title"])
-        if not period:
-            body = ((r["body_text"] or "") + " " + (r["content_text"] or ""))[:600]
-            period = parse_period(body)
-        # 제목에 기간이 없으면 needs_review(날짜매칭 제외)
-        start = end = None
-        needs_review = 1
-        if period:
-            start, end, _kind = period
-            needs_review = 0
-        conn.execute(
-            "INSERT INTO reservation_blocks "
-            "(instt_id, alert_type, scope, affected_units, start_date, end_date, "
-            "reason, source_twbbs_id, needs_review, extracted_at) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (r["instt_id"], atype, None, None, start, end,
-             re.sub(r"\s+", " ", (r["title"] or "")).strip(),
-             r["twbbs_id"], needs_review, ts),
-        )
-        n += 1
-    conn.commit()
+    with conn:  # 원자적: 성공 시 커밋, 예외 시 롤백
+        conn.execute("DELETE FROM reservation_blocks")
+        for r in rows:
+            atype = classify(r["title"])
+            if not atype:
+                continue
+            # 기간은 제목 우선, 없으면 본문의 '기간 암시 앵커' 근처만 탐색(오참조 방지).
+            period = parse_period(r["title"])
+            if not period:
+                body = ((r["body_text"] or "") + " " + (r["content_text"] or ""))[:1000]
+                period = _body_period(body, r["updated_at"])
+            # 기간을 못 뽑으면 needs_review(날짜매칭 제외)
+            start = end = None
+            needs_review = 1
+            if period:
+                start, end, _kind = period
+                needs_review = 0
+            conn.execute(
+                "INSERT INTO reservation_blocks "
+                "(instt_id, alert_type, scope, affected_units, start_date, end_date, "
+                "reason, source_twbbs_id, needs_review, extracted_at) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                (r["instt_id"], atype, None, None, start, end,
+                 re.sub(r"\s+", " ", (r["title"] or "")).strip(),
+                 r["twbbs_id"], needs_review, ts),
+            )
+            n += 1
     return n

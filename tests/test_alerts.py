@@ -93,3 +93,19 @@ def test_expired_block_not_active():
     conn.commit()
     extract_blocks(conn, since="2025-01-01")
     assert active_restrictions(conn, date(2026, 7, 1)) == []  # 만료
+
+
+def test_body_period_rejects_past_reference():
+    from jforest.alerts import _body_period
+    # 공지일(2026-06) 이전에 끝나는 과거 날짜는 배제(요금개정 등 오참조 방지)
+    assert _body_period("2021.5.1.~5.31. 요금 인상 이력", "2026-06-01") is None
+    # 공지일 이후/현재 기간은 유지
+    p = _body_period("공사기간 2026.7.1.~7.31. 예약불가", "2026-06-01")
+    assert p and p[0] == "2026-07-01"
+
+
+def test_body_period_anchor_precision():
+    from jforest.alerts import _body_period
+    # '기간' 앵커 근처 기간을 우선 취함
+    p = _body_period("휴관 기간: 2026.7.1.~7.10. 자세한 내용은 ...", "2026-06-01")
+    assert p and p[0] == "2026-07-01" and p[1] == "2026-07-10"
