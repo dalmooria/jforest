@@ -233,17 +233,33 @@ def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", text or ""))
 
 
+def _seg_has_date(seg: str) -> bool:
+    return bool(seg and (_RE_WEEKLY.search(seg) or _RE_WEEKLY_BARE.search(seg)
+                         or _RE_MONTHLY.search(seg)))
+
+
 def _anchored_segment(norm_text: str):
-    """가장 이른 '예약신청' 앵커부터 다음 섹션 마커 직전까지의 세그먼트."""
-    best_i, seg = None, None
+    """앵커('예약신청' 등)부터 다음 섹션 마커 직전까지의 세그먼트.
+
+    날짜가 실제로 든 가장 이른 세그먼트를 고른다. '우선예약' 같은 범용 앵커가
+    무관한 문장(예: '외국인 우선예약 정책')을 먼저 집어 날짜 구간을 놓치는
+    오탐을 막는다. 날짜 있는 후보가 없으면 가장 이른 세그먼트로 폴백한다.
+    """
+    cands = []
     for a in _ANCHORS:
         i = norm_text.find(a)
-        if i != -1 and (best_i is None or i < best_i):
-            after = norm_text[i + len(a):]
-            m = _SECTION_MARK.search(after)
-            seg = after[: m.start()] if m else after[:80]
-            best_i = i
-    return seg
+        if i == -1:
+            continue
+        after = norm_text[i + len(a):]
+        m = _SECTION_MARK.search(after)
+        cands.append((i, after[: m.start()] if m else after[:80]))
+    if not cands:
+        return None
+    cands.sort(key=lambda x: x[0])
+    for _i, seg in cands:
+        if _seg_has_date(seg):
+            return seg
+    return cands[0][1]
 
 
 def _fmt_time(hour: int, minute: int = 0) -> str:
