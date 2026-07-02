@@ -140,6 +140,20 @@ CREATE TABLE IF NOT EXISTS fetch_log (
   duration_ms INTEGER,
   fetched_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS reservation_blocks (
+  id INTEGER PRIMARY KEY,
+  instt_id TEXT NOT NULL,
+  alert_type TEXT,
+  scope TEXT,
+  affected_units TEXT,
+  start_date TEXT,
+  end_date TEXT,
+  reason TEXT,
+  source_twbbs_id TEXT,
+  needs_review INTEGER DEFAULT 0,
+  extracted_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_blocks_instt ON reservation_blocks (instt_id);
 """
 
 

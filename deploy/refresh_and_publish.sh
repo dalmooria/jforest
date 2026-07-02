@@ -16,9 +16,11 @@ touch "$LOCK"
 PY="$REPO/.venv/bin/python"
 
 echo "$(date -u +%FT%TZ) [1/3] 데이터 갱신"
-# Phase 2 완료 후 활성화:
-# "$REPO/.venv/bin/jforest" crawl notices --incremental || true
-# "$REPO/.venv/bin/jforest" alerts-extract || true
+# 공지 재크롤(네트워크·정부사이트 다수 요청) — 최신 공사/예약제외를 원하면 주석 해제.
+# 증분(기존 twbbs_id skip)이지만 185개 휴양림 순회라 무거움. 초기엔 수동/주1회 권장.
+# "$REPO/.venv/bin/jforest" crawl notices || true
+# 공지 → 예약불가 블록 재추출(네트워크 없음, 항상 안전).
+"$REPO/.venv/bin/jforest" alerts-extract || true
 
 echo "$(date -u +%FT%TZ) [2/3] 서빙 스냅샷 export"
 "$PY" -c "from jforest.export_serving import export_serving; print(export_serving())"

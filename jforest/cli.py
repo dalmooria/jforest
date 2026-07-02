@@ -335,6 +335,21 @@ def fcfs_report(ctx, date_str):
     click.echo(format_report(rows, on_date))
 
 
+@main.command("alerts-extract")
+@click.option("--since", default="2025-01-01", help="이 날짜 이후 공지만 (기본 2025-01-01)")
+@click.pass_context
+def alerts_extract_cmd(ctx, since):
+    """공지에서 예약불가/공사/예약제외 기간을 추출해 reservation_blocks에 적재한다."""
+    from jforest.alerts import extract_blocks
+
+    n = extract_blocks(ctx.obj["conn"], since=since)
+    conn = ctx.obj["conn"]
+    dated = conn.execute(
+        "SELECT COUNT(*) FROM reservation_blocks WHERE start_date IS NOT NULL"
+    ).fetchone()[0]
+    click.echo(f"블록 {n}건 적재 (기간 파싱 {dated}건, 미상 {n - dated}건)")
+
+
 @main.command("open-report")
 @click.option("--date", "date_str", default=None, help="기준일 YYYY-MM-DD (기본: 오늘)")
 @click.pass_context

@@ -281,11 +281,17 @@ def build_open_events(conn, on_date):
 3. ✅ `/open` 반응형 UI (모바일 1열·데스크톱 2열, Playwright 375/1200 검증)
 4. ✅ `jforest open-report --date` 터미널 명령 + `format_open_report`
 
-**Phase 2 (예정)**
-5. `db.py` `reservation_blocks` + `crawlers/notices.py` 증분 보완
-6. `alerts.py` 분류+구조화 + 테스트
-7. `build_open_events`에 block 조인 + UI 배지
-8. cron 스케줄 문서화
+**Phase 2 ✅ 완료 (규칙 기반, LLM 없이)**
+5. ✅ `db.py` `reservation_blocks` 테이블
+6. ✅ `alerts.py` 제목/본문 규칙 추출(classify + parse_period: range/month/asof) +
+   `jforest alerts-extract` CLI. 기간 파싱 47%(215/449), 미상은 needs_review로 배제.
+7. ✅ `build_open_events`에 활성 block 조인 → 이벤트 `alerts` 배지 + `active_restrictions`
+   섹션. 서빙 스냅샷에 `reservation_blocks` 포함. UI ⚠배지·이용제한 섹션. 테스트 9개.
+8. ✅ `deploy/refresh_and_publish.sh`에 alerts-extract 활성화(네트워크 無).
+   공지 재크롤(`crawl notices`)은 정부사이트 부하로 주석 유지(수동/주1회 권장).
+
+> 참고: LLM 구조화는 미도입(규칙 기반으로 충분). 기간 파싱 실패분(needs_review)의
+> 본문 정밀 파싱·scope/affected_units 추출이 향후 LLM 보강 여지.
 
 ---
 

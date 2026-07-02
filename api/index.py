@@ -133,6 +133,8 @@ _HTML = """<!DOCTYPE html>
   .badge { border-radius:999px; padding:2px 8px; font-size:.75rem; }
   .b-type { background:#eef4ff; color:#0a52c4; } .b-time { background:#f0f0f2; color:#333; }
   .b-est { background:#fff4e5; color:#a25b00; } .b-unk { background:#fdecec; color:#b3261e; }
+  .b-alert { background:#fce8e6; color:#c5221f; font-weight:700; }
+  .card.warn { border-color:#f3c0bc; }
   .fac { display:inline-flex; gap:4px; }
   .f { border-radius:6px; padding:1px 6px; font-size:.72rem; }
   .fO { background:#e5f5e8; color:#1a7f37; } .fX { background:#eee; color:#777; } .fT { background:#fff6d6; color:#8a6d00; }
@@ -180,16 +182,24 @@ function priceLine(e){
   if(e.price_min&&e.price_max) s+=' · '+won(e.price_min)+'~'+won(e.price_max)+'원';
   return `<div class="rm">${s}</div>`;
 }
+function mmdd(d){return d?d.slice(5).replace('-','/'):'';}
+function alertBadge(e){
+  if(!e.alerts||!e.alerts.length) return '';
+  const a=e.alerts[0];
+  return `<span class="badge b-alert">⚠ ${a.alert_type}${a.end_date?' ~'+mmdd(a.end_date):''}</span>`;
+}
 function card(e){
   const title=e.homepage_url
     ? `<a class="nm" href="${e.homepage_url}" target="_blank" rel="noopener">${e.name} ↗</a>`
     : `<span class="nm plain">${e.name}</span>`;
-  return `<div class="card">${title} <span class="rg">${e.region}</span>
+  const warn=(e.alerts&&e.alerts.length)?' warn':'';
+  return `<div class="card${warn}">${title} <span class="rg">${e.region}</span>
     <div class="row2">
       <span class="badge b-type">${e.type_label}</span>
       <span class="badge b-time">${e.open_time||'시각 미상'}</span>
       ${e.confidence==='추정'?'<span class="badge b-est">추정</span>':''}
       ${e.confidence==='미상'?'<span class="badge b-unk">일정 확인</span>':''}
+      ${alertBadge(e)}
       <span class="fac"><span class="f ${fCls(e.water_play)}">물${e.water_play}</span>
       <span class="f ${fCls(e.barbecue)}">바${e.barbecue}</span>
       <span class="f ${fCls(e.forest_guide)}">숲${e.forest_guide}</span></span>
@@ -222,6 +232,14 @@ function apply(){
     } else {
       h+=det(g.type_group, g.events, g.events.length<=12);
     }
+  }
+  const restr=filt(REP.restrictions||[]);
+  if(restr.length){
+    h+=`<details><summary>⚠ 이용 제한 안내 · 공사/예약제외/휴관 (${restr.length})</summary><div class="cards">`
+      +restr.map(r=>`<div class="card warn"><span class="nm plain">${r.name}</span> <span class="rg">${r.region}</span>
+        <div class="row2"><span class="badge b-alert">⚠ ${r.alert_type}${r.end_date?' ~'+mmdd(r.end_date):''}</span></div>
+        <div class="resv">${r.reason}</div></div>`).join('')
+      +`</div></details>`;
   }
   if(unc.length){
     h+=`<details><summary>⚠ 일정 확인 필요 (${unc.length})</summary><div class="cards">`

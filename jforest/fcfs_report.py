@@ -332,6 +332,24 @@ def _room_summary_map(conn) -> dict:
             for r in conn.execute("SELECT * FROM forest_room_summary")}
 
 
+def _active_blocks_map(conn, on_date: date) -> dict:
+    """on_date에 활성인 예약불가 블록(needs_review=0) → {instt_id: [block, …]}."""
+    if not conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='reservation_blocks'"
+    ).fetchone():
+        return {}
+    d = on_date.isoformat()
+    out = {}
+    for r in conn.execute(
+        "SELECT instt_id, alert_type, start_date, end_date, reason FROM reservation_blocks "
+        "WHERE needs_review=0 AND start_date<=? AND end_date>=? ORDER BY end_date", (d, d)
+    ):
+        out.setdefault(r["instt_id"], []).append({
+            "alert_type": r["alert_type"], "start_date": r["start_date"],
+            "end_date": r["end_date"], "reason": r["reason"]})
+    return out
+
+
 def _reservable(group, type_label, kind, week_label, on_date, confidence) -> str:
     if confidence == "미상":
         return "일정 확인 필요"
@@ -348,7 +366,7 @@ def _reservable(group, type_label, kind, week_label, on_date, confidence) -> str
     return "예약 오픈"
 
 
-def _event(instt_id, meta, fac, summary, group, type_label, kind, week_label,
+def _event(instt_id, meta, fac, summary, blocks, group, type_label, kind, week_label,
            open_time, time_conf, on_date, conf):
     name, region, homepage = meta.get(instt_id, ("(미상)", "기타", None))
     wp, bbq, fg = fac.get(instt_id, ("△", "△", "△"))
@@ -362,6 +380,7 @@ def _event(instt_id, meta, fac, summary, group, type_label, kind, week_label,
         "confidence": conf,
         "water_play": wp, "barbecue": bbq, "forest_guide": fg,
         "room_count": room_count, "price_min": price_min, "price_max": price_max,
+        "alerts": blocks.get(instt_id, []),
     }
 
 
@@ -390,6 +409,7 @@ def build_open_events(conn, on_date: date) -> list:
     meta = _forest_meta(conn)
     fac = _facilities_map(conn)
     summ = _room_summary_map(conn)
+    blocks = _active_blocks_map(conn, on_date)
     events = []
 
     # (1) 선착순 — reservation_policies + 기존 _classify
@@ -403,7 +423,7 @@ def build_open_events(conn, on_date: date) -> list:
         if not _opens_on(kind, key, on_date):
             continue
         tm = _open_time_from_fcfs(r["fcfs_detail"])
-        events.append(_event(r["instt_id"], meta, fac, summ, "선착순", "선착순",
+        events.append(_event(r["instt_id"], meta, fac, summ, blocks, "선착순", "선착순",
                              kind, week_label, tm, "확정" if tm else "미상",
                              on_date, "확정"))
 
@@ -419,7 +439,7 @@ def build_open_events(conn, on_date: date) -> list:
             continue  # 미상은 build_open_report의 별도 리스트로 (날짜 오탐 방지)
         if not _opens_on(pe["kind"], pe["key"], on_date):
             continue
-        events.append(_event(r["instt_id"], meta, fac, summ, group,
+        events.append(_event(r["instt_id"], meta, fac, summ, blocks, group,
                              RULE_LABEL.get(r["rule_id"], group),
                              pe["kind"], None, pe["open_time"], pe["time_conf"],
                              on_date, pe["conf"]))
@@ -429,7 +449,7 @@ def build_open_events(conn, on_date: date) -> list:
         for r in conn.execute(
             "SELECT DISTINCT instt_id FROM reservation_policy_details WHERE rule_id='102'"
         ):
-            events.append(_event(r["instt_id"], meta, fac, summ, "선착순",
+            events.append(_event(r["instt_id"], meta, fac, summ, blocks, "선착순",
                                  "일반오픈(미선정분)", "general", None,
                                  GENERAL_OPEN[2], "확정", on_date, "추정"))
 
@@ -496,8 +516,22 @@ def upcoming_openings(on_date: date) -> list:
     return out
 
 
+def active_restrictions(conn, on_date: date) -> list:
+    """on_date에 예약불가/공사/휴관 등 제한이 걸린 휴양림(오픈 여부 무관)."""
+    meta = _forest_meta(conn)
+    out = []
+    for iid, blks in _active_blocks_map(conn, on_date).items():
+        name, region, _hp = meta.get(iid, ("(미상)", "기타", None))
+        b = blks[0]  # 가장 이른 종료
+        out.append({"instt_id": iid, "name": (name or "").strip(), "region": region,
+                    "alert_type": b["alert_type"], "end_date": b["end_date"],
+                    "reason": b["reason"], "count": len(blks)})
+    out.sort(key=lambda e: (_REGION_ORDER.get(e["region"], 99), e["name"]))
+    return out
+
+
 def build_open_report(conn, on_date: date) -> dict:
-    """API/JSON용 리포트 dict. 타입별 그룹 + 미상 참고 + 성수기 안내."""
+    """API/JSON용 리포트 dict. 타입별 그룹 + 미상 참고 + 제한 안내 + 성수기 안내."""
     events = build_open_events(conn, on_date)
     groups = []
     for g in ("선착순", "추첨", "지역주민"):
@@ -511,6 +545,7 @@ def build_open_report(conn, on_date: date) -> dict:
         "groups": groups,
         "uncertain": collect_uncertain(conn),
         "upcoming": upcoming_openings(on_date),
+        "restrictions": active_restrictions(conn, on_date),
         "seasonal_note": SEASONAL_NOTE,
     }
 
