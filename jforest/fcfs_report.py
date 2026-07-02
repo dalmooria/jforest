@@ -317,8 +317,19 @@ def _facilities_map(conn) -> dict:
 
 
 def _forest_meta(conn) -> dict:
-    return {r["instt_id"]: (r["name"], _region(r["sido_code"]))
-            for r in conn.execute("SELECT instt_id, name, sido_code FROM forests")}
+    return {r["instt_id"]: (r["name"], _region(r["sido_code"]), r["homepage_url"])
+            for r in conn.execute(
+                "SELECT instt_id, name, sido_code, homepage_url FROM forests")}
+
+
+def _room_summary_map(conn) -> dict:
+    """forest_room_summary(서빙 스냅샷에만 존재) → {iid: (room_count, price_min, price_max)}."""
+    if not conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='forest_room_summary'"
+    ).fetchone():
+        return {}
+    return {r["instt_id"]: (r["room_count"], r["price_min"], r["price_max"])
+            for r in conn.execute("SELECT * FROM forest_room_summary")}
 
 
 def _reservable(group, type_label, kind, week_label, on_date, confidence) -> str:
@@ -337,17 +348,20 @@ def _reservable(group, type_label, kind, week_label, on_date, confidence) -> str
     return "예약 오픈"
 
 
-def _event(instt_id, meta, fac, group, type_label, kind, week_label,
+def _event(instt_id, meta, fac, summary, group, type_label, kind, week_label,
            open_time, time_conf, on_date, conf):
-    name, region = meta.get(instt_id, ("(미상)", "기타"))
+    name, region, homepage = meta.get(instt_id, ("(미상)", "기타", None))
     wp, bbq, fg = fac.get(instt_id, ("△", "△", "△"))
+    room_count, price_min, price_max = summary.get(instt_id, (None, None, None))
     return {
         "instt_id": instt_id, "name": (name or "").strip(), "region": region,
+        "homepage_url": homepage,
         "type_group": group, "type_label": type_label,
         "kind": kind, "open_time": open_time, "time_confidence": time_conf,
         "reservable_label": _reservable(group, type_label, kind, week_label, on_date, conf),
         "confidence": conf,
         "water_play": wp, "barbecue": bbq, "forest_guide": fg,
+        "room_count": room_count, "price_min": price_min, "price_max": price_max,
     }
 
 
@@ -375,6 +389,7 @@ def build_open_events(conn, on_date: date) -> list:
     """on_date에 예약창이 열리는 채널(이벤트) 목록을 반환한다(병합·정렬 완료)."""
     meta = _forest_meta(conn)
     fac = _facilities_map(conn)
+    summ = _room_summary_map(conn)
     events = []
 
     # (1) 선착순 — reservation_policies + 기존 _classify
@@ -388,7 +403,7 @@ def build_open_events(conn, on_date: date) -> list:
         if not _opens_on(kind, key, on_date):
             continue
         tm = _open_time_from_fcfs(r["fcfs_detail"])
-        events.append(_event(r["instt_id"], meta, fac, "선착순", "선착순",
+        events.append(_event(r["instt_id"], meta, fac, summ, "선착순", "선착순",
                              kind, week_label, tm, "확정" if tm else "미상",
                              on_date, "확정"))
 
@@ -404,7 +419,7 @@ def build_open_events(conn, on_date: date) -> list:
             continue  # 미상은 build_open_report의 별도 리스트로 (날짜 오탐 방지)
         if not _opens_on(pe["kind"], pe["key"], on_date):
             continue
-        events.append(_event(r["instt_id"], meta, fac, group,
+        events.append(_event(r["instt_id"], meta, fac, summ, group,
                              RULE_LABEL.get(r["rule_id"], group),
                              pe["kind"], None, pe["open_time"], pe["time_conf"],
                              on_date, pe["conf"]))
@@ -414,7 +429,7 @@ def build_open_events(conn, on_date: date) -> list:
         for r in conn.execute(
             "SELECT DISTINCT instt_id FROM reservation_policy_details WHERE rule_id='102'"
         ):
-            events.append(_event(r["instt_id"], meta, fac, "선착순",
+            events.append(_event(r["instt_id"], meta, fac, summ, "선착순",
                                  "일반오픈(미선정분)", "general", None,
                                  GENERAL_OPEN[2], "확정", on_date, "추정"))
 
@@ -437,7 +452,7 @@ def collect_uncertain(conn) -> list:
         if k in seen:
             continue
         seen.add(k)
-        name, region = meta.get(r["instt_id"], ("(미상)", "기타"))
+        name, region, _hp = meta.get(r["instt_id"], ("(미상)", "기타", None))
         out.append({"instt_id": r["instt_id"], "name": (name or "").strip(),
                     "region": region, "type_group": group,
                     "type_label": RULE_LABEL.get(r["rule_id"], group)})

@@ -58,6 +58,20 @@ def export_serving(src_path: str = "data/jforest.db",
                     [tuple(r) for r in rows],
                 )
             counts[table] = len(rows)
+        # 휴양림별 객실수/가격범위 요약(원본 rooms/room_prices 2.4만행 대신 집계만).
+        dst.execute("CREATE TABLE forest_room_summary "
+                    "(instt_id TEXT PRIMARY KEY, room_count INTEGER, price_min INTEGER, price_max INTEGER)")
+        if _table_exists(src, "rooms") and _table_exists(src, "room_prices"):
+            rows = src.execute(
+                "SELECT r.instt_id, COUNT(DISTINCT r.goods_id) rc, "
+                "MIN(NULLIF(p.price,0)) pmin, MAX(p.price) pmax "
+                "FROM rooms r LEFT JOIN room_prices p ON p.goods_id=r.goods_id "
+                "GROUP BY r.instt_id"
+            ).fetchall()
+            dst.executemany(
+                "INSERT INTO forest_room_summary VALUES (?,?,?,?)",
+                [(r["instt_id"], r["rc"], r["pmin"], r["pmax"]) for r in rows])
+            counts["forest_room_summary"] = len(rows)
         dst.execute("CREATE TABLE serving_meta (key TEXT PRIMARY KEY, value TEXT)")
         dst.execute(
             "INSERT INTO serving_meta (key, value) VALUES ('generated_at', ?)",
