@@ -112,27 +112,32 @@ def build_fcfs_report(conn, on_date: date) -> list:
             "FROM forests f JOIN reservation_policies p ON f.instt_id = p.instt_id "
             "ORDER BY f.name"
         )
+    genmap = _general_open_map(conn)
     rows = []
     for r in conn.execute(sql):
-        classified = _classify(r["fcfs_method"], r["fcfs_detail"])
-        if not classified:
-            continue
-        kind, weekday_index, week_label = classified
-        if not _opens_on(kind, weekday_index, on_date):
-            continue
-        rows.append(
-            {
-                "instt_id": r["instt_id"],
-                "name": (r["name"] or "").strip(),
-                "method": (r["fcfs_method"] or "").strip(),
-                "kind": kind,  # "weekly"(매주 반복) | "monthly"(오늘 지정 오픈)
-                "week_label": week_label,
-                "reservable_label": _reservable_label(kind, week_label, on_date),
-                "water_play": r["water_play"],
-                "barbecue": r["barbecue"],
-                "forest_guide": r["forest_guide"],
-            }
-        )
+        gen = genmap.get(r["instt_id"])
+        for s in _fcfs_open_specs(r["fcfs_method"], r["fcfs_detail"], gen):
+            if not _opens_on(s["kind"], s["key"], on_date):
+                continue
+            if s["type_label"] == "일반전환":
+                reservable = "지역주민 미신청·취소분 일반오픈"
+            else:
+                reservable = _reservable_label(s["kind"], s["week_label"], on_date)
+            if s["conf"] == "추정":
+                reservable += " (오픈일 추정)"
+            rows.append(
+                {
+                    "instt_id": r["instt_id"],
+                    "name": (r["name"] or "").strip(),
+                    "method": (r["fcfs_method"] or "").strip(),
+                    "kind": s["kind"],  # "weekly"(매주 반복) | "monthly"(오늘 지정 오픈)
+                    "week_label": s["week_label"] or "",
+                    "reservable_label": reservable,
+                    "water_play": r["water_play"],
+                    "barbecue": r["barbecue"],
+                    "forest_guide": r["forest_guide"],
+                }
+            )
     return rows
 
 
@@ -294,6 +299,130 @@ def _open_time_from_fcfs(fcfs_detail: str):
     return _match_time(_normalize(fcfs_detail))
 
 
+# ─── 지역주민 우선분 → 일반 선착순 전환일 ────────────────────────────────
+# 시군 휴양림은 매월 1~N일 지역주민 우선예약 후, 미신청·취소분이 '전환일'에 일반에게
+# 열린다. 이 전환일이 진짜 '일반 선착순 오픈일'인데 fcfs_method(rule 101) 본문 첫 날짜는
+# 대개 지역주민 우선일(1일)이라 _classify가 이를 놓친다 → policy_details에서 보정한다.
+_GENERAL_OPEN = re.compile(
+    r"(?:선착순\s*(?:일반예약\s*)?전환|일반\s*(?:예약)?\s*(?:전환|오픈)|일반고객\s*오픈)"
+    r"\s*[:：]?\s*(?:매[월달]\s*)?(\d{1,2})\s*일"
+)
+# 시군 지역주민 규칙(우선/우대추첨/월추첨)이 전환일을 담는다. 107(산림복지바우처)은
+# 전국 공통 '매월 15일' 폴백이라 시군 규칙이 없을 때만 사용한다.
+_GEN_OPEN_PRIMARY = ("104", "105", "111")
+_GEN_OPEN_FALLBACK = ("107",)
+
+
+_RE_TIME_BARE = re.compile(r"(\d{1,2})\s*시")  # 오전/오후·콜론 없는 24시제 '14시'
+
+
+def _match_bare_hour(seg: str):
+    """'14시', '09시'처럼 오전/오후 표기 없는 24시제 시각을 읽는다(전환일 본문에 흔함)."""
+    if not seg:
+        return None
+    m = _RE_TIME_BARE.search(seg)
+    if not m:
+        return None
+    h = int(m.group(1))
+    return _fmt_time(h) if h <= 23 else None
+
+
+def _extract_general_open(text: str):
+    """'선착순 전환 / 일반(예약·고객) 전환·오픈 : 매월 N일 [시각]' → (day, open_time) 또는 None."""
+    norm = _normalize(text)
+    m = _GENERAL_OPEN.search(norm)
+    if not m:
+        return None
+    seg = norm[m.end(): m.end() + 20]
+    return int(m.group(1)), _match_time(seg) or _match_bare_hour(seg)
+
+
+def _general_open_map(conn) -> dict:
+    """{instt_id: (day, open_time, rule_id)} — 지역주민 우선분이 일반에게 열리는 전환일.
+
+    시군 규칙(104/105/111)을 바우처(107)보다 우선하고, 여러 개면 가장 이른 날을 쓴다.
+    """
+    prim, fallb = {}, {}
+    for r in conn.execute(
+        "SELECT instt_id, rule_id, detail_text FROM reservation_policy_details"
+    ):
+        g = _extract_general_open(r["detail_text"])
+        if not g:
+            continue
+        day, tm = g
+        if r["rule_id"] in _GEN_OPEN_PRIMARY:
+            bucket = prim
+        elif r["rule_id"] in _GEN_OPEN_FALLBACK:
+            bucket = fallb
+        else:
+            continue
+        cur = bucket.get(r["instt_id"])
+        if cur is None or day < cur[0]:
+            bucket[r["instt_id"]] = (day, tm, r["rule_id"])
+    out = dict(fallb)
+    out.update(prim)  # 시군 전환일이 있으면 바우처(107)를 덮어쓴다
+    return out
+
+
+def _is_fallback_monthly(fcfs_method, fcfs_detail) -> bool:
+    """'익월말'인데 본문에 '매월 N일'이 없어 오픈일을 1일로 임의추정한 경우."""
+    return ((fcfs_method or "").strip() == "익월말"
+            and not _DETAIL_MONTHLY.search(fcfs_detail or ""))
+
+
+def _weekly_general_open(gen):
+    """주간 휴양림에 '추가'할 일반전환일인지 판정한다.
+
+    시군(104/105/111)은 항상 추가한다. 바우처(107)는 '매월 15일'만 build_open_events
+    (3)단계와 중복이라 제외하고, 그 외 특정일(6·8·16일 등)은 추가한다.
+    """
+    if not gen:
+        return None
+    day, _gtm, rule = gen
+    if rule in _GEN_OPEN_PRIMARY:
+        return gen
+    if rule in _GEN_OPEN_FALLBACK and day != 15:
+        return gen
+    return None
+
+
+def _fcfs_open_specs(fcfs_method, fcfs_detail, gen):
+    """선착순 정책 1건 → 이 정책이 여는 오픈 이벤트 스펙 목록(날짜 무관).
+
+    - 월간: 분류일(대개 1일=지역주민 우선)을 진짜 전환일(gen)로 '교체'한다.
+    - 주간: 매주 요일 창은 유지하고, 전환일이 따로 있으면 '일반전환' 이벤트를 '추가'한다.
+    스펙의 conf는 오픈일 신뢰도('확정' | '추정'). 근거 없는 1일 폴백만 '추정'.
+    """
+    c = _classify(fcfs_method, fcfs_detail)
+    if not c:
+        return []
+    kind, key, week_label = c
+    specs = []
+    if kind == "monthly":
+        if gen:
+            day, gtm, _rule = gen
+            # 전환일 본문에서 뽑은 시각만 신뢰한다. fcfs_detail 폴백은 예약대기 등
+            # 무관한 시각('24:00' 등)을 오탐하므로 쓰지 않고, 없으면 '미상'으로 둔다.
+            specs.append({"kind": "monthly", "key": day, "week_label": week_label,
+                          "open_time": gtm, "type_label": "선착순", "conf": "확정"})
+        else:
+            specs.append({"kind": "monthly", "key": key, "week_label": week_label,
+                          "open_time": _open_time_from_fcfs(fcfs_detail),
+                          "type_label": "선착순",
+                          "conf": "추정" if _is_fallback_monthly(fcfs_method, fcfs_detail)
+                                  else "확정"})
+    else:  # weekly
+        specs.append({"kind": "weekly", "key": key, "week_label": week_label,
+                      "open_time": _open_time_from_fcfs(fcfs_detail),
+                      "type_label": "선착순", "conf": "확정"})
+        add = _weekly_general_open(gen)
+        if add:
+            day, gtm, _rule = add
+            specs.append({"kind": "monthly", "key": day, "week_label": None,
+                          "open_time": gtm, "type_label": "일반전환", "conf": "확정"})
+    return specs
+
+
 def _fac_mark(val, needs_review) -> str:
     if needs_review:
         return "△"
@@ -356,6 +485,8 @@ def _reservable(group, type_label, kind, week_label, on_date, confidence) -> str
     if group == "선착순":
         if type_label.startswith("일반오픈"):
             return "추첨 미선정·취소분 오픈"
+        if type_label.startswith("일반전환"):
+            return "지역주민 미신청·취소분 일반오픈"
         if kind == "weekly":
             return _reservable_label(kind, week_label, on_date)
         return "익월 말일 이용분 예약가능"
@@ -412,20 +543,19 @@ def build_open_events(conn, on_date: date) -> list:
     blocks = _active_blocks_map(conn, on_date)
     events = []
 
-    # (1) 선착순 — reservation_policies + 기존 _classify
+    # (1) 선착순 — reservation_policies + _classify, 전환일은 policy_details로 보정
+    genmap = _general_open_map(conn)
     for r in conn.execute(
         "SELECT instt_id, fcfs_method, fcfs_detail FROM reservation_policies"
     ):
-        c = _classify(r["fcfs_method"], r["fcfs_detail"])
-        if not c:
-            continue
-        kind, key, week_label = c
-        if not _opens_on(kind, key, on_date):
-            continue
-        tm = _open_time_from_fcfs(r["fcfs_detail"])
-        events.append(_event(r["instt_id"], meta, fac, summ, blocks, "선착순", "선착순",
-                             kind, week_label, tm, "확정" if tm else "미상",
-                             on_date, "확정"))
+        gen = genmap.get(r["instt_id"])
+        for s in _fcfs_open_specs(r["fcfs_method"], r["fcfs_detail"], gen):
+            if not _opens_on(s["kind"], s["key"], on_date):
+                continue
+            tm = s["open_time"]
+            events.append(_event(r["instt_id"], meta, fac, summ, blocks, "선착순",
+                                 s["type_label"], s["kind"], s["week_label"],
+                                 tm, "확정" if tm else "미상", on_date, s["conf"]))
 
     # (2) 추첨·지역주민 — reservation_policy_details
     for r in conn.execute(
