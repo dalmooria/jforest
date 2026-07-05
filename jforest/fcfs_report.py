@@ -19,9 +19,24 @@ _WD_INDEX = {name: i for i, name in enumerate(WEEKDAYS)}
 # "6주 수요일", "6주 수" 모두 허용
 _WEEKLY_METHOD = re.compile(r"(\d+)\s*주\s*([월화수목금토일])")
 # 상세정책 본문: "매주 수요일 ... 6주차"
-_DETAIL_WEEKDAY = re.compile(r"매주\s*([월화수목금토일])요일")
+_DETAIL_WEEKDAY = re.compile(r"매주\s*([월화수목금토일])\s*요일")
 _DETAIL_WEEKNUM = re.compile(r"(\d+)\s*주차")
-_DETAIL_MONTHLY = re.compile(r"매월\s*(\d+)\s*일")
+_DETAIL_MONTHLY = re.compile(r"매[월달]\s*(\d+)\s*일")  # '매월'·'매달' 모두 허용
+_HOLIDAY_NEAR = re.compile(r"휴무|휴일|휴관|휴장|정기휴")
+
+
+def _detail_weekly_open(detail: str):
+    """fcfs_detail에서 '예약/오픈 … 매주 X요일' 주간 오픈을 찾는다.
+
+    '매주 화요일은 휴무' 같은 정기휴일 언급은 제외한다(오픈일 아님).
+    """
+    for m in _DETAIL_WEEKDAY.finditer(detail or ""):
+        around = detail[max(0, m.start() - 20): m.end() + 12]
+        if _HOLIDAY_NEAR.search(around):
+            continue
+        if re.search(r"예약|오픈|신청", around):
+            return m
+    return None
 
 
 def _classify(method: str, detail: str):
@@ -39,7 +54,13 @@ def _classify(method: str, detail: str):
         return "weekly", _WD_INDEX[m.group(2)], f"{m.group(1)}주차"
 
     if method == "익월말":
-        # 월간 오픈일은 휴양림마다 다르다(1·5·7·10·11일 등) → 본문에서 파싱, 없으면 1일.
+        # 일부 휴양림은 method='익월말'이라도 본문은 '매주 X요일' 주간 오픈이다(방화동·와룡).
+        wd = _detail_weekly_open(detail)
+        if wd:
+            num = _DETAIL_WEEKNUM.search(detail)
+            label = f"{num.group(1)}주차" if num else "매주 오픈"
+            return "weekly", _WD_INDEX[wd.group(1)], label
+        # 월간 오픈일은 휴양림마다 다르다(1·4·5·7·10·11일 등) → 본문에서 파싱, 없으면 1일.
         mon = _DETAIL_MONTHLY.search(detail)
         day = int(mon.group(1)) if mon else 1
         return "monthly", day, "익월 말일까지"
