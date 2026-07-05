@@ -19,9 +19,24 @@ _WD_INDEX = {name: i for i, name in enumerate(WEEKDAYS)}
 # "6주 수요일", "6주 수" 모두 허용
 _WEEKLY_METHOD = re.compile(r"(\d+)\s*주\s*([월화수목금토일])")
 # 상세정책 본문: "매주 수요일 ... 6주차"
-_DETAIL_WEEKDAY = re.compile(r"매주\s*([월화수목금토일])요일")
+_DETAIL_WEEKDAY = re.compile(r"매주\s*([월화수목금토일])\s*요일")
 _DETAIL_WEEKNUM = re.compile(r"(\d+)\s*주차")
-_DETAIL_MONTHLY = re.compile(r"매월\s*(\d+)\s*일")
+_DETAIL_MONTHLY = re.compile(r"매[월달]\s*(\d+)\s*일")  # '매월'·'매달' 모두 허용
+_HOLIDAY_NEAR = re.compile(r"휴무|휴일|휴관|휴장|정기휴")
+
+
+def _detail_weekly_open(detail: str):
+    """fcfs_detail에서 '예약/오픈 … 매주 X요일' 주간 오픈을 찾는다.
+
+    '매주 화요일은 휴무' 같은 정기휴일 언급은 제외한다(오픈일 아님).
+    """
+    for m in _DETAIL_WEEKDAY.finditer(detail or ""):
+        around = detail[max(0, m.start() - 20): m.end() + 12]
+        if _HOLIDAY_NEAR.search(around):
+            continue
+        if re.search(r"예약|오픈|신청", around):
+            return m
+    return None
 
 
 def _classify(method: str, detail: str):
@@ -39,7 +54,13 @@ def _classify(method: str, detail: str):
         return "weekly", _WD_INDEX[m.group(2)], f"{m.group(1)}주차"
 
     if method == "익월말":
-        # 월간 오픈일은 휴양림마다 다르다(1·5·7·10·11일 등) → 본문에서 파싱, 없으면 1일.
+        # 일부 휴양림은 method='익월말'이라도 본문은 '매주 X요일' 주간 오픈이다(방화동·와룡).
+        wd = _detail_weekly_open(detail)
+        if wd:
+            num = _DETAIL_WEEKNUM.search(detail)
+            label = f"{num.group(1)}주차" if num else "매주 오픈"
+            return "weekly", _WD_INDEX[wd.group(1)], label
+        # 월간 오픈일은 휴양림마다 다르다(1·4·5·7·10·11일 등) → 본문에서 파싱, 없으면 1일.
         mon = _DETAIL_MONTHLY.search(detail)
         day = int(mon.group(1)) if mon else 1
         return "monthly", day, "익월 말일까지"
@@ -215,7 +236,10 @@ SEASONAL_NOTE = ("성수기추첨: 매년 5월말~6월 접수 / 이용 7·8월 /
 _GROUP_ORDER = {"선착순": 0, "추첨": 1, "지역주민": 2}
 
 _ANCHORS = ["예약 신청", "예약신청", "신청 접수 기간", "신청접수기간",
-            "추첨 예약 신청", "추첨예약신청", "접수 기간", "우선 예약", "우선예약"]
+            "추첨 예약 신청", "추첨예약신청", "추첨 신청", "추첨신청",
+            "예약 접수 기간", "예약접수기간", "예약 기간", "예약기간",
+            "신청 기간", "신청기간", "예약 방식", "예약방식",
+            "우선예약제", "접수 기간", "우선 예약", "우선예약"]
 _SECTION_MARK = re.compile(r"[○※▶■]|(?<!\d)-\s")
 _RE_MONTHLY = re.compile(r"매[월달]\s*(\d{1,2})\s*일")
 _RE_WEEKLY = re.compile(r"매주\s*([월화수목금토일])\s*요일")
@@ -233,9 +257,18 @@ def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", text or ""))
 
 
+def _monthly_day(seg: str):
+    """세그먼트의 '매월 N일' 오픈일(int). 'N일 기준 …일 전' 상대표현은 절대일이 아니라 제외."""
+    for m in _RE_MONTHLY.finditer(seg or ""):
+        if seg[m.end():].lstrip().startswith("기준"):
+            continue
+        return int(m.group(1))
+    return None
+
+
 def _seg_has_date(seg: str) -> bool:
     return bool(seg and (_RE_WEEKLY.search(seg) or _RE_WEEKLY_BARE.search(seg)
-                         or _RE_MONTHLY.search(seg)))
+                         or _monthly_day(seg) is not None))
 
 
 def _anchored_segment(norm_text: str):
@@ -247,12 +280,15 @@ def _anchored_segment(norm_text: str):
     """
     cands = []
     for a in _ANCHORS:
-        i = norm_text.find(a)
-        if i == -1:
-            continue
-        after = norm_text[i + len(a):]
-        m = _SECTION_MARK.search(after)
-        cands.append((i, after[: m.start()] if m else after[:80]))
+        start = 0
+        while True:  # 앵커의 모든 출현을 후보로 (첫 출현이 날짜 없는 문장일 수 있음)
+            i = norm_text.find(a, start)
+            if i == -1:
+                break
+            after = norm_text[i + len(a):]
+            m = _SECTION_MARK.search(after)
+            cands.append((i, after[: m.start()] if m else after[:80]))
+            start = i + len(a)
     if not cands:
         return None
     cands.sort(key=lambda x: x[0])
@@ -296,9 +332,9 @@ def parse_open_event(detail_text: str, rule_id: str):
         if m:
             kind, key = "weekly", _WD_INDEX[m.group(1)]
         else:
-            m = _RE_MONTHLY.search(seg)
-            if m:
-                kind, key = "monthly", int(m.group(1))
+            day = _monthly_day(seg)
+            if day is not None:
+                kind, key = "monthly", day
     if kind is None:
         d = NATIONAL_DEFAULT.get(rule_id)
         if not d:
@@ -311,8 +347,21 @@ def parse_open_event(detail_text: str, rule_id: str):
 
 
 def _open_time_from_fcfs(fcfs_detail: str):
-    """선착순 fcfs_detail 본문에서 오픈 시각을 뽑는다(국립은 대개 '오전 9시')."""
-    return _match_time(_normalize(fcfs_detail))
+    """선착순 fcfs_detail 본문에서 오픈 시각을 뽑는다(국립은 대개 '오전 9시').
+
+    '예약 신청은 … N시부터' 문맥을 우선 보고 24시제 'N시'('09시부터')도 읽는다.
+    (예약대기 '24시' 등 무관한 시각 오탐을 피하려 신청 문맥에 한정한다.)
+    """
+    norm = _normalize(fcfs_detail)
+    for a in ("예약 신청은", "예약신청은", "예약 신청", "예약신청"):
+        i = norm.find(a)
+        if i == -1:
+            continue
+        after = norm[i + len(a):]
+        m = _SECTION_MARK.search(after)
+        seg = after[: m.start()] if m else after[:60]
+        return _match_time(seg) or _match_bare_hour(seg) or _match_time(norm)
+    return _match_time(norm)
 
 
 # ─── 지역주민 우선분 → 일반 선착순 전환일 ────────────────────────────────
